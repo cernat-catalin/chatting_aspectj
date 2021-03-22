@@ -27,7 +27,6 @@ public class UserThread extends Thread {
     }
 
     public void run() {
-
         try {
             final User user = handleUserJoin();
             server.addUserName(user.getName());
@@ -41,9 +40,14 @@ public class UserThread extends Thread {
                 processMessage(obj);
             } while (!shouldQuit);
         } catch (IOException | ClassNotFoundException ex) {
-            System.out.println("Error in UserThread: " + ex.getMessage());
-            ex.printStackTrace();
+            System.out.println("Error in UserThread. Will remove user. Error was: " + ex.getMessage());
+        } finally {
+            handleUserRemove();
         }
+    }
+
+    private void handleUserRemove() {
+        server.removeUser(user.getName(), this);
     }
 
     private User handleUserJoin() {
@@ -58,7 +62,7 @@ public class UserThread extends Thread {
                 throw new RuntimeException("Expected a Handshake Message");
             }
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Error parsing message from server. ", e);
+            throw new RuntimeException("Error parsing message from user. ", e);
         }
     }
 
@@ -73,6 +77,7 @@ public class UserThread extends Thread {
                 final UserChatMessage userChatMessage = (UserChatMessage) message;
                 final ServerAnnouncementMessage serverAnnouncementMessage = new ServerAnnouncementMessage();
                 serverAnnouncementMessage.setAnnouncement("[" + user.getName() + "]: " + userChatMessage.getMessage());
+                System.out.printf("GOT user message: %s\n", userChatMessage.message);
                 sendMessage(serverAnnouncementMessage);
                 break;
             case USER_QUIT:
