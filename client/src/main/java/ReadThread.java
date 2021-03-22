@@ -6,13 +6,11 @@ import java.io.ObjectInputStream;
 import java.net.Socket;
 
 public class ReadThread extends Thread {
+    private final ClientState clientState;
     private ObjectInputStream reader;
-    private Socket socket;
-    private ChatClient client;
 
-    public ReadThread(Socket socket, ChatClient client) {
-        this.socket = socket;
-        this.client = client;
+    public ReadThread(Socket socket, ClientState clientState) {
+        this.clientState = clientState;
 
         try {
             this.reader = new ObjectInputStream(socket.getInputStream());
@@ -23,23 +21,30 @@ public class ReadThread extends Thread {
     }
 
     public void run() {
-        while (true) {
+        try {
+            while (!clientState.shouldQuit()) {
+                final int available = reader.available();
+                if (available > 0) {
+                    final Object obj = reader.readObject();
+                    processMessage(obj);
+                } else {
+                    Thread.sleep(200);
+                }
+            }
+        } catch (IOException | ClassNotFoundException | InterruptedException ex) {
+//                clientState.setShouldQuit(true);
+            System.out.println("Error reading from server: " + ex.getMessage());
+            ex.printStackTrace();
+        } finally {
             try {
-                final Object obj = reader.readObject();
-                processMessage(obj);
-                // prints the username after displaying the server's message
-//                if (client.getUserName() != null) {
-//                    System.out.print("[" + client.getUserName() + "]: ");
-//                }
-            } catch (IOException | ClassNotFoundException ex) {
-                System.out.println("Error reading from server: " + ex.getMessage());
-                ex.printStackTrace();
-                break;
+                reader.close();
+            } catch (IOException e) {
+                System.out.printf("ERROR while closing reader stream %s\n", e);
             }
         }
     }
 
-    private void processMessage(Object obj) throws IOException {
+    private void processMessage(Object obj) {
         if (!(obj instanceof Message)) {
             throw new RuntimeException("Wrong message type. Should inherit from Message. Object: " + obj);
         }

@@ -15,10 +15,21 @@ public class App extends Application {
 
     private final Scene loginScene;
     private final Scene chatScene;
+    private ClientState clientState;
+    private ChatClient client;
 
     public App() {
         loginScene = loginScene();
         chatScene = chatScene();
+    }
+
+    public void startServer() {
+        this.clientState = new ClientState();
+        final String hostname = "localhost";
+        final int port = 8000;
+
+        this.client = new ChatClient(hostname, port, clientState);
+        client.start();
     }
 
     @Override
@@ -26,10 +37,18 @@ public class App extends Application {
         final Hello hello = new Hello();
         hello.sayHello();
 
+        startServer();
+
         final Scene loginScene = loginScene();
 
         stage.setScene(loginScene);
         stage.show();
+    }
+
+    @Override
+    public void stop() {
+//        clientState.setShouldQuit(true);
+        client.stop();
     }
 
     public Stage currentStage() {
@@ -48,6 +67,9 @@ public class App extends Application {
         final TextArea textArea = new TextArea();
         grid.add(textArea, 0, 0);
 
+        final TextField textField = new TextField();
+        grid.add(textField, 0, 1);
+
         final Button sendBtn = new Button("Send");
         final Button logoutBtn = new Button("Log out");
 
@@ -57,7 +79,12 @@ public class App extends Application {
         hbBtn.getChildren().add(logoutBtn);
         grid.add(hbBtn, 1, 4);
 
-        sendBtn.setOnAction(e -> System.out.print("Click !!"));
+        sendBtn.setOnAction(e -> {
+            final String text = textField.getText();
+            clientState.addMessageToSend(text);
+            textField.clear();
+        });
+
         logoutBtn.setOnAction(e -> {
             currentStage().setScene(loginScene);
         });
