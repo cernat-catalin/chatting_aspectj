@@ -1,3 +1,5 @@
+package org.chatting.server;
+
 import org.chatting.common.message.HandshakeMessage;
 import org.chatting.common.message.Message;
 import org.chatting.common.message.ServerAnnouncementMessage;
@@ -29,10 +31,10 @@ public class UserThread extends Thread {
     public void run() {
         try {
             final User user = handleUserJoin();
-            server.addUserName(user.getName());
+            server.addUserName(user.getUsername());
             this.user = user;
             final ServerAnnouncementMessage serverAnnouncementMessage = new ServerAnnouncementMessage();
-            serverAnnouncementMessage.setAnnouncement("New user connected:" + user.getName());
+            serverAnnouncementMessage.setAnnouncement("New user connected:" + user.getUsername());
             server.broadcast(serverAnnouncementMessage, this);
 
             do {
@@ -40,14 +42,14 @@ public class UserThread extends Thread {
                 processMessage(obj);
             } while (!shouldQuit);
         } catch (IOException | ClassNotFoundException ex) {
-            System.out.println("Error in UserThread. Will remove user. Error was: " + ex.getMessage());
+            System.out.println("Error in org.chatting.server.UserThread. Will remove user. Error was: " + ex.getMessage());
         } finally {
             handleUserRemove();
         }
     }
 
     private void handleUserRemove() {
-        server.removeUser(user.getName(), this);
+        server.removeUser(user.getUsername(), this);
     }
 
     private User handleUserJoin() {
@@ -55,8 +57,8 @@ public class UserThread extends Thread {
             final Object obj = reader.readObject();
             if (obj instanceof HandshakeMessage) {
                 final HandshakeMessage handshakeMessage = (HandshakeMessage) obj;
-                final User user = new User();
-                user.setName(handshakeMessage.getName());
+                final User user = new User(1, "catalin", "pass");
+//                user.setUsername(handshakeMessage.getName());
                 return user;
             } else {
                 throw new RuntimeException("Expected a Handshake Message");
@@ -76,7 +78,7 @@ public class UserThread extends Thread {
             case USER_CHAT:
                 final UserChatMessage userChatMessage = (UserChatMessage) message;
                 final ServerAnnouncementMessage serverAnnouncementMessage = new ServerAnnouncementMessage();
-                serverAnnouncementMessage.setAnnouncement("[" + user.getName() + "]: " + userChatMessage.getMessage());
+                serverAnnouncementMessage.setAnnouncement("[" + user.getUsername() + "]: " + userChatMessage.getMessage());
                 System.out.printf("GOT user message: %s\n", userChatMessage.message);
                 sendMessage(serverAnnouncementMessage);
                 break;

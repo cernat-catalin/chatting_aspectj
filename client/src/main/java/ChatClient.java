@@ -22,9 +22,6 @@ public class ChatClient {
             this.socket = new Socket(hostname, port);
             System.out.println("Connected to the chat server");
 
-//            new WriteThread(socket, clientState).start();
-//            new ReadThread(socket, clientState).start();
-
             this.writeThread = new WriteThread(socket, clientState);
             this.readThread = new ReadThread(socket, clientState);
 

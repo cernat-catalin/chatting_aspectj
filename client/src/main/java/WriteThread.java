@@ -7,18 +7,12 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class WriteThread extends Thread {
-    private ClientState clientState;
-    private ObjectOutputStream writer;
+    private final ClientState clientState;
+    private final ObjectOutputStream writer;
 
-    public WriteThread(Socket socket, ClientState clientState) {
+    public WriteThread(Socket socket, ClientState clientState) throws IOException {
         this.clientState = clientState;
-
-        try {
-            writer = new ObjectOutputStream(socket.getOutputStream());
-        } catch (IOException ex) {
-            System.out.println("Error getting output stream: " + ex.getMessage());
-            ex.printStackTrace();
-        }
+        writer = new ObjectOutputStream(socket.getOutputStream());
     }
 
     public void run() {

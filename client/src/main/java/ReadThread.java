@@ -6,33 +6,29 @@ import java.io.ObjectInputStream;
 import java.net.Socket;
 
 public class ReadThread extends Thread {
+
+    private static final int SLEEP_BETWEEN_READ_CHECKS = 200;
+
     private final ClientState clientState;
-    private ObjectInputStream reader;
+    private final ObjectInputStream reader;
 
-    public ReadThread(Socket socket, ClientState clientState) {
+    public ReadThread(Socket socket, ClientState clientState) throws IOException {
         this.clientState = clientState;
-
-        try {
-            this.reader = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException ex) {
-            System.out.println("Error getting input stream: " + ex.getMessage());
-            ex.printStackTrace();
-        }
+        this.reader = new ObjectInputStream(socket.getInputStream());
     }
 
     public void run() {
         try {
             while (!clientState.shouldQuit()) {
-                final int available = reader.available();
-                if (available > 0) {
+                final boolean readAvailable = reader.available() > 0;
+                if (readAvailable) {
                     final Object obj = reader.readObject();
                     processMessage(obj);
                 } else {
-                    Thread.sleep(200);
+                    Thread.sleep(SLEEP_BETWEEN_READ_CHECKS);
                 }
             }
         } catch (IOException | ClassNotFoundException | InterruptedException ex) {
-//                clientState.setShouldQuit(true);
             System.out.println("Error reading from server: " + ex.getMessage());
             ex.printStackTrace();
         } finally {

@@ -1,3 +1,5 @@
+package org.chatting.server;
+
 import org.chatting.common.message.Message;
 
 import java.io.IOException;
@@ -51,7 +53,7 @@ public class ChatServer {
     }
 
     /**
-     * When a client is disconneted, removes the associated username and UserThread
+     * When a client is disconneted, removes the associated username and org.chatting.server.UserThread
      */
     void removeUser(String userName, UserThread aUser) {
         boolean removed = userNames.remove(userName);

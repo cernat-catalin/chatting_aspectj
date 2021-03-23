@@ -47,7 +47,6 @@ public class App extends Application {
 
     @Override
     public void stop() {
-//        clientState.setShouldQuit(true);
         client.stop();
     }
 

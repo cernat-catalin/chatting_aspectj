@@ -1,3 +1,5 @@
+package org.chatting.server;
+
 public class HelloServer {
 
     public void sayHello() {

@@ -65,7 +65,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.5</version>
                 <configuration>
-                    <mainClass>Main</mainClass>
+                    <mainClass>org.chatting.server.Main</mainClass>
                 </configuration>
             </plugin>
 
