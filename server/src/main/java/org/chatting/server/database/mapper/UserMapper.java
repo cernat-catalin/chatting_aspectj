@@ -1,6 +1,7 @@
-package org.chatting.server.database;
+package org.chatting.server.database.mapper;
 
 import org.chatting.server.User;
+import org.chatting.server.database.DatabaseException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

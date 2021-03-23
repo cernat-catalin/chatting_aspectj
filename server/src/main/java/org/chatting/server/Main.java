@@ -16,7 +16,8 @@ public class Main {
         helloServer.sayHello();
 
         final DatabaseService databaseService = new DatabaseService();
-        final User user = databaseService.getUser();
+//        final User user = databaseService.getAllUsers();
+        final User user = databaseService.getUserByUsername("catalin");
         System.out.printf("User: %d %s %s\n", user.getId(), user.getUsername(), user.getPassword());
 
         final int port = 8000;

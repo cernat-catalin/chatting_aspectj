@@ -13,10 +13,10 @@ How to run: from /server run: `mvn clean compile exec:java -Dexec.mainClass="org
 
 Things to introduce:
 * [DONE] Socket communication 
-* Database integration
+* [DONE] Database integration
 * Authentication
 * [PARTIAL] GUI to Client
 
 
 Where to use aspects:
-
+* [DONE] Transaction management

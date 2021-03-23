@@ -1,8 +1,8 @@
-package org.chatting.server;
+package org.chatting.server.aspects;
 
 import java.sql.Connection;
 
-public aspect DBAspect percflow(topLevelTransaction()) {
+public aspect TransactionAspect percflow(topLevelTransaction()) {
 
     private Connection connection;
 
@@ -44,20 +44,12 @@ public aspect DBAspect percflow(topLevelTransaction()) {
         }
     }
 
-    void around(): closeConnection() && !within(DBAspect) {
+    void around(): closeConnection() && !within(org.chatting.server.aspects.TransactionAspect) {
     }
 
-    private static aspect SoftSQLException {
-        declare soft:java.sql.SQLException:
-                call (void Connection.close())
-                        || call (void Connection.setAutoCommit(boolean))
-                        || call (void Connection.rollback())
-                        && within(DBAspect);
-    }
-
-    public static class TransactionException extends RuntimeException {
-        public TransactionException(Throwable cause) {
-            super(cause);
-        }
-    }
+    declare soft:java.sql.SQLException:
+            call (void Connection.close())
+                    || call (void Connection.setAutoCommit(boolean))
+                    || call (void Connection.rollback())
+                    && within(org.chatting.server.aspects.TransactionAspect);
 }

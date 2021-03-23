@@ -1,4 +1,4 @@
-package org.chatting.server.database;
+package org.chatting.server.database.mapper;
 
 import java.sql.ResultSet;
 import java.util.List;
