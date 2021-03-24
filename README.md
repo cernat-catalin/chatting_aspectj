@@ -14,7 +14,7 @@ How to run: from /server run: `mvn clean compile exec:java -Dexec.mainClass="org
 Things to introduce:
 * [DONE] Socket communication 
 * [DONE] Database integration
-* [ ] Authentication
+* [DONE] Authentication
 * [DONE] GUI to Client
 * [ ] Perfect GUI
 

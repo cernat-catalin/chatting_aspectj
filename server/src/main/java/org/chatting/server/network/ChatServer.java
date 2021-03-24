@@ -36,11 +36,17 @@ public class ChatServer {
         }
     }
 
+    void broadcast(Message message) throws IOException {
+        for (UserThread userThread : userThreads) {
+            userThread.sendMessage(message);
+        }
+    }
+
     void broadcast(Message message, UserThread excludeUser) throws IOException {
-        for (UserThread aUser : userThreads) {
-//            if (aUser != excludeUser) {
-                aUser.sendMessage(message);
-//            }
+        for (UserThread userThread : userThreads) {
+            if (userThread != excludeUser) {
+                userThread.sendMessage(message);
+            }
         }
     }
 

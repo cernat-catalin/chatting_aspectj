@@ -1,12 +1,13 @@
 package org.chatting.client.network;
 
 import org.chatting.client.gui.EventQueue;
+import org.chatting.client.gui.event.ChatMessageReceived;
 import org.chatting.client.gui.event.Event;
 import org.chatting.client.gui.event.LoginResultEvent;
 import org.chatting.client.model.NetworkModel;
+import org.chatting.common.message.ChatMessage;
 import org.chatting.common.message.LoginResultMessage;
 import org.chatting.common.message.Message;
-import org.chatting.common.message.ServerAnnouncementMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -54,9 +55,15 @@ public class ReadThread extends Thread {
 
         final Message message = (Message) obj;
         switch (message.getMessageType()) {
-            case SERVER_ANNOUNCEMENT:
-                final ServerAnnouncementMessage serverAnnouncementMessage = (ServerAnnouncementMessage) message;
-                System.out.println("\n" + serverAnnouncementMessage.getAnnouncement());
+            case CHAT_MESSAGE:
+                final ChatMessage chatMessage = (ChatMessage) message;
+
+                final Event chatMessageReceived = new ChatMessageReceived(
+                        ChatMessageReceived.AuthorType.valueOf(chatMessage.getAuthorType().name()),
+                        chatMessage.getAuthorName(),
+                        chatMessage.getMessage()
+                );
+                eventQueue.pushEvent(chatMessageReceived);
                 break;
             case LOGIN_RESULT:
                 System.out.printf("Received login result message\n");

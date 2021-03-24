@@ -12,4 +12,8 @@ public class SendButtonClick implements Event {
     public EventType getEventType() {
         return EventType.SEND_BUTTON_CLICK;
     }
+
+    public String getTextFieldText() {
+        return textFieldText;
+    }
 }

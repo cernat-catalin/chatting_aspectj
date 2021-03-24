@@ -6,6 +6,6 @@ public class UserDisconnectedMessage implements Message, Serializable {
 
     @Override
     public MessageType getMessageType() {
-        return MessageType.USER_QUIT;
+        return MessageType.USER_DISCONNECT;
     }
 }

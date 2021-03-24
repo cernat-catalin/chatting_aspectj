@@ -13,21 +13,24 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import org.chatting.client.gui.EventQueue;
-import org.chatting.client.gui.SceneType;
-import org.chatting.client.gui.event.ChangeSceneEvent;
 import org.chatting.client.gui.event.Event;
 import org.chatting.client.gui.event.LoginButtonClick;
+import org.chatting.client.model.GUIModel;
 
 public class LoginController {
 
     private final EventQueue eventQueue;
+    private final GUIModel guiModel;
+    private final Scene scene;
 
-    public LoginController(EventQueue eventQueue) {
+    public LoginController(EventQueue eventQueue, GUIModel guiModel) {
         this.eventQueue = eventQueue;
+        this.guiModel = guiModel;
+        this.scene = generateLoginScene();
     }
 
     public Scene getScene() {
-        return generateLoginScene();
+        return scene;
     }
 
     private Scene generateLoginScene() {
@@ -37,9 +40,9 @@ public class LoginController {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
-        final Text scenetitle = new Text("Welcome");
-        scenetitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
-        grid.add(scenetitle, 0, 0, 2, 1);
+        final Text sceneTitle = new Text("Welcome");
+        sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        grid.add(sceneTitle, 0, 0, 2, 1);
 
         // Username Field
         final Label usernameLabel = new Label("User Name:");
@@ -72,6 +75,6 @@ public class LoginController {
             eventQueue.pushEvent(loginButtonClick);
         });
 
-        return new Scene(grid, 300, 275);
+        return new Scene(grid, 400, 200);
     }
 }

@@ -35,6 +35,7 @@ public class App extends Application {
 
         final Scene loginScene = sceneManager.getCurrentScene();
         stage.setScene(loginScene);
+        stage.setResizable(false);
         stage.show();
     }
 

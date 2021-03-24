@@ -35,10 +35,10 @@ public class UserThread extends Thread {
                 System.out.println("User disconnected before login!");
             } else {
                 sendLoginResult();
-                this.user = userOpt.get();
-                final ServerAnnouncementMessage serverAnnouncementMessage = new ServerAnnouncementMessage();
-                serverAnnouncementMessage.setAnnouncement("New user connected:" + this.user.getUsername());
-                server.broadcast(serverAnnouncementMessage, this);
+                user = userOpt.get();
+                final String announcement = String.format("%s has joined the chat!", user.getUsername());
+                final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.SERVER, "Server", announcement);
+                server.broadcast(chatMessage);
                 do {
                     final Object obj = reader.readObject();
                     processMessage(obj);
@@ -81,20 +81,18 @@ public class UserThread extends Thread {
 
         final Message message = (Message) obj;
         switch (message.getMessageType()) {
-            case USER_CHAT:
-                final UserChatMessage userChatMessage = (UserChatMessage) message;
-                final ServerAnnouncementMessage serverAnnouncementMessage = new ServerAnnouncementMessage();
-                serverAnnouncementMessage.setAnnouncement("[" + user.getUsername() + "]: " + userChatMessage.getMessage());
-                System.out.printf("GOT user message: %s\n", userChatMessage.message);
-                sendMessage(serverAnnouncementMessage);
+            case USER_SEND_MESSAGE:
+                final UserSendMessage userSendMessage = (UserSendMessage) message;
+                final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.USER,
+                        user.getUsername(), userSendMessage.getMessage());
+                server.broadcast(chatMessage);
                 break;
-            case USER_QUIT:
+            case USER_DISCONNECT:
                 shouldQuit = true;
                 break;
             default:
                 throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + message.getMessageType());
         }
-
     }
 
     void sendMessage(Message message) throws IOException {

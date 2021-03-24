@@ -1,11 +1,14 @@
 package org.chatting.client.gui;
 
 import javafx.application.Platform;
+import org.chatting.client.gui.event.ChatMessageReceived;
 import org.chatting.client.gui.event.Event;
 import org.chatting.client.gui.event.LoginButtonClick;
+import org.chatting.client.gui.event.SendButtonClick;
 import org.chatting.client.network.NetworkService;
 import org.chatting.common.message.LoginMessage;
 import org.chatting.common.message.Message;
+import org.chatting.common.message.UserSendMessage;
 
 public class EventThread extends Thread {
 
@@ -52,13 +55,18 @@ public class EventThread extends Thread {
                     sceneManager.changeScene(SceneType.CHAT_ROOM);
                 });
                 break;
-//            case CHANGE_SCENE:
-//                System.out.println("Change Scene!!!!");
-//                final ChangeSceneEvent changeSceneEvent = (ChangeSceneEvent) event;
-//                Platform.runLater(() -> {
-//                    sceneManager.changeScene(changeSceneEvent.getSceneType());
-//                });
-//                break;
+            case SEND_BUTTON_CLICK:
+                final SendButtonClick sendButtonClick = (SendButtonClick) event;
+                final String message = sendButtonClick.getTextFieldText();
+                final Message userChatMessage = new UserSendMessage(message);
+                networkService.sendMessage(userChatMessage);
+                break;
+            case CHAT_MESSAGE_RECEIVED:
+                final ChatMessageReceived chatMessageReceived = (ChatMessageReceived) event;
+                Platform.runLater(() -> {
+                    sceneManager.getGuiModel().addChatMessage(formatMessage(chatMessageReceived));
+                });
+                break;
             default:
                 throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + event.getEventType());
         }
@@ -66,5 +74,13 @@ public class EventThread extends Thread {
 
     public void stopProcessing() {
         shouldQuit = true;
+    }
+
+    private String formatMessage(ChatMessageReceived chatMessageReceived) {
+        if (chatMessageReceived.getAuthorType() == ChatMessageReceived.AuthorType.SERVER) {
+            return String.format("[SERVER]: %s", chatMessageReceived.getMessage());
+        } else {
+            return String.format("%s: %s", chatMessageReceived.getAuthorName(), chatMessageReceived.getMessage());
+        }
     }
 }
