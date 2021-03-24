@@ -1,10 +1,7 @@
 package org.chatting.client.gui;
 
 import javafx.application.Platform;
-import org.chatting.client.gui.event.ChatMessageReceived;
-import org.chatting.client.gui.event.Event;
-import org.chatting.client.gui.event.LoginButtonClick;
-import org.chatting.client.gui.event.SendButtonClick;
+import org.chatting.client.gui.event.*;
 import org.chatting.client.network.NetworkService;
 import org.chatting.common.message.LoginMessage;
 import org.chatting.common.message.Message;
@@ -65,6 +62,13 @@ public class EventThread extends Thread {
                 final ChatMessageReceived chatMessageReceived = (ChatMessageReceived) event;
                 Platform.runLater(() -> {
                     sceneManager.getGuiModel().addChatMessage(formatMessage(chatMessageReceived));
+                });
+                break;
+            case USER_LIST_RECEIVED:
+                System.out.printf("User List received");
+                final UserListReceived userListReceived = (UserListReceived) event;
+                Platform.runLater(() -> {
+                    sceneManager.getGuiModel().setConnectedUsers(userListReceived.getConnectedUsers());
                 });
                 break;
             default:

@@ -4,10 +4,12 @@ import org.chatting.client.gui.EventQueue;
 import org.chatting.client.gui.event.ChatMessageReceived;
 import org.chatting.client.gui.event.Event;
 import org.chatting.client.gui.event.LoginResultEvent;
+import org.chatting.client.gui.event.UserListReceived;
 import org.chatting.client.model.NetworkModel;
 import org.chatting.common.message.ChatMessage;
 import org.chatting.common.message.LoginResultMessage;
 import org.chatting.common.message.Message;
+import org.chatting.common.message.UserListMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -71,6 +73,12 @@ public class ReadThread extends Thread {
 
                 final Event loginResultEvent = new LoginResultEvent(loginResultMessage.isLoginAccepted());
                 eventQueue.pushEvent(loginResultEvent);
+                break;
+            case USER_LIST:
+                System.out.printf("User list received network");
+                final UserListMessage userListMessage = (UserListMessage) message;
+                final Event userListReceived = new UserListReceived(userListMessage.getConnectedUsers());
+                eventQueue.pushEvent(userListReceived);
                 break;
             default:
                 throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + message.getMessageType());

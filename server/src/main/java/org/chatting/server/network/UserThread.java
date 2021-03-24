@@ -36,6 +36,7 @@ public class UserThread extends Thread {
             } else {
                 sendLoginResult();
                 user = userOpt.get();
+                server.sendConnectedUsersList();
                 final String announcement = String.format("%s has joined the chat!", user.getUsername());
                 final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.SERVER, "Server", announcement);
                 server.broadcast(chatMessage);
