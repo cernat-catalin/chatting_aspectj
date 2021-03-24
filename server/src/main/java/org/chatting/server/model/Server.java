@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
-    private final List<User> connectedUserEntities = new ArrayList<>();
+    private final List<User> connectedUsers = new ArrayList<>();
 
     public void addUser(User user) {
-        connectedUserEntities.add(user);
+        connectedUsers.add(user);
     }
 
     public List<User> getConnectedUsers() {
-        return connectedUserEntities;
+        return connectedUsers;
     }
 }

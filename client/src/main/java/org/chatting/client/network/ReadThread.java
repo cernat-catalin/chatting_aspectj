@@ -1,10 +1,10 @@
 package org.chatting.client.network;
 
 import org.chatting.client.gui.EventQueue;
-import org.chatting.client.gui.event.ChatMessageReceived;
+import org.chatting.client.gui.event.ChatMessageReceivedEvent;
 import org.chatting.client.gui.event.Event;
 import org.chatting.client.gui.event.LoginResultEvent;
-import org.chatting.client.gui.event.UserListReceived;
+import org.chatting.client.gui.event.UserListReceivedEvent;
 import org.chatting.client.model.NetworkModel;
 import org.chatting.common.message.ChatMessage;
 import org.chatting.common.message.LoginResultMessage;
@@ -60,8 +60,8 @@ public class ReadThread extends Thread {
             case CHAT_MESSAGE:
                 final ChatMessage chatMessage = (ChatMessage) message;
 
-                final Event chatMessageReceived = new ChatMessageReceived(
-                        ChatMessageReceived.AuthorType.valueOf(chatMessage.getAuthorType().name()),
+                final Event chatMessageReceived = new ChatMessageReceivedEvent(
+                        ChatMessageReceivedEvent.AuthorType.valueOf(chatMessage.getAuthorType().name()),
                         chatMessage.getAuthorName(),
                         chatMessage.getMessage()
                 );
@@ -77,7 +77,7 @@ public class ReadThread extends Thread {
             case USER_LIST:
                 System.out.printf("User list received network");
                 final UserListMessage userListMessage = (UserListMessage) message;
-                final Event userListReceived = new UserListReceived(userListMessage.getConnectedUsers());
+                final Event userListReceived = new UserListReceivedEvent(userListMessage.getConnectedUsers());
                 eventQueue.pushEvent(userListReceived);
                 break;
             default:

@@ -2,11 +2,11 @@ package org.chatting.client.gui.event;
 
 import java.util.List;
 
-public class UserListReceived implements Event {
+public class UserListReceivedEvent implements Event {
 
     private final List<String> connectedUsers;
 
-    public UserListReceived(List<String> connectedUsers) {
+    public UserListReceivedEvent(List<String> connectedUsers) {
         this.connectedUsers = connectedUsers;
     }
 

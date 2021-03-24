@@ -1,7 +1,7 @@
 package org.chatting.server.database;
 
-import org.chatting.server.entity.UserEntity;
 import org.chatting.server.database.mapper.UserMapper;
+import org.chatting.server.entity.UserEntity;
 
 import java.text.MessageFormat;
 import java.util.List;

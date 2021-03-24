@@ -16,7 +16,7 @@ Things to introduce:
 * [DONE] Database integration
 * [DONE] Authentication
 * [DONE] GUI to Client
-* [ ] Perfect GUI
+* [PARTIAL] Good GUI
 
 
 Where to use aspects:

@@ -7,9 +7,11 @@ import org.chatting.common.message.UserDisconnectedMessage;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Collection;
 
 public class WriteThread extends Thread {
+
+    private static final int SLEEP_BETWEEN_EVENT_CHECKS = 100;
+
     private final NetworkModel networkModel;
     private final ObjectOutputStream writer;
 
@@ -21,14 +23,11 @@ public class WriteThread extends Thread {
     public void run() {
         try {
             while (!networkModel.shouldQuit()) {
-                if (networkModel.hasPendingMessages()) {
-                    final Collection<Message> messages = networkModel.clearPendingMessages();
-                    for (Message message : messages) {
-                        writer.writeObject(message);
-                    }
-                } else {
-                    Thread.sleep(100);
+                while (networkModel.hasPendingMessages()) {
+                    final Message message = networkModel.popMessage();
+                    writer.writeObject(message);
                 }
+                Thread.sleep(SLEEP_BETWEEN_EVENT_CHECKS);
             }
             handleDisconnect();
         } catch (IOException | InterruptedException e) {

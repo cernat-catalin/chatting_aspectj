@@ -1,10 +1,10 @@
 package org.chatting.client.gui.event;
 
-public class SendButtonClick implements Event {
+public class SendButtonClickEvent implements Event {
 
     private final String textFieldText;
 
-    public SendButtonClick(String textFieldText) {
+    public SendButtonClickEvent(String textFieldText) {
         this.textFieldText = textFieldText;
     }
 

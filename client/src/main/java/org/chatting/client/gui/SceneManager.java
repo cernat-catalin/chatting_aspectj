@@ -8,19 +8,16 @@ import org.chatting.client.gui.controller.LoginController;
 import org.chatting.client.model.GUIModel;
 
 public class SceneManager {
-    private final EventQueue eventQueue;
     private final LoginController loginController;
     private final ChatRoomController chatRoomController;
     private final GUIModel guiModel;
     private Scene currentScene;
 
     public SceneManager(EventQueue eventQueue) {
-        this.eventQueue = eventQueue;
         this.guiModel = new GUIModel();
-        this.loginController = new LoginController(eventQueue, guiModel);
-        this.chatRoomController = new ChatRoomController(eventQueue, guiModel);
+        this.loginController = new LoginController(guiModel, eventQueue);
+        this.chatRoomController = new ChatRoomController(guiModel, eventQueue);
         this.currentScene = loginController.getScene();
-//        this.currentScene = chatRoomController.getScene();
     }
 
     public GUIModel getGuiModel() {

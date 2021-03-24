@@ -12,15 +12,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ChatServer {
+public class NetworkService {
     private final int port;
     private final Set<UserThread> userThreads = new HashSet<>();
 
-    public ChatServer(int port) {
+    public NetworkService(int port) {
         this.port = port;
     }
 
-    public void execute() {
+    public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Chat Server is listening on port " + port);
 
@@ -28,7 +28,7 @@ public class ChatServer {
                 final Socket socket = serverSocket.accept();
                 System.out.println("New user connected");
 
-                final UserThread newUser = new UserThread(socket, this, null);
+                final UserThread newUser = new UserThread(socket, this);
                 userThreads.add(newUser);
                 newUser.start();
             }
@@ -45,20 +45,12 @@ public class ChatServer {
         }
     }
 
-    void broadcast(Message message, UserThread excludeUser) throws IOException {
-        for (UserThread userThread : userThreads) {
-            if (userThread != excludeUser) {
-                userThread.sendMessage(message);
-            }
-        }
-    }
-
     void removeUser(UserThread userThread) {
         try {
             userThreads.remove(userThread);
             final User user = userThread.getUser();
             if (user != null) {
-                System.out.println("The user " + userThread.getUser().getDisplayName() + " has left");
+                System.out.println("The user " + userThread.getUser().getUsername() + " has left");
             } else {
                 System.out.println("A user has left before login");
             }
@@ -74,7 +66,6 @@ public class ChatServer {
                 .map(ut -> ut.getUser().getUsername())
                 .collect(Collectors.toList());
         final Message message = new UserListMessage(connectedUsers);
-
         for (UserThread userThread : userThreads) {
             userThread.sendMessage(message);
         }

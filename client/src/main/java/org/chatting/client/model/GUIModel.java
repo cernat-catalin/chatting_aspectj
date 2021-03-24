@@ -10,10 +10,6 @@ public class GUIModel {
     private ListView<String> chatMessagesListView;
     private ListView<String> connectedUsersListView;
 
-    public ListView<String> getChatMessagesListView() {
-        return chatMessagesListView;
-    }
-
     public void setChatMessagesListView(ListView<String> chatMessagesListView) {
         this.chatMessagesListView = chatMessagesListView;
     }
@@ -21,10 +17,6 @@ public class GUIModel {
     public void addChatMessage(String chatMessage) {
         chatMessagesListView.getItems().add(chatMessage);
         chatMessagesListView.scrollTo(chatMessagesListView.getItems().size() - 1);
-    }
-
-    public ListView<String> getConnectedUsersListView() {
-        return connectedUsersListView;
     }
 
     public void setConnectedUsersListView(ListView<String> connectedUsersListView) {

@@ -1,7 +1,7 @@
 package org.chatting.server.database.mapper;
 
-import org.chatting.server.entity.UserEntity;
 import org.chatting.server.database.DatabaseException;
+import org.chatting.server.entity.UserEntity;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

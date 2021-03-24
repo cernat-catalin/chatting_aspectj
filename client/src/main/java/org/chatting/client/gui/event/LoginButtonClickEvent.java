@@ -1,11 +1,11 @@
 package org.chatting.client.gui.event;
 
-public class LoginButtonClick implements Event {
+public class LoginButtonClickEvent implements Event {
 
     private final String username;
     private final String password;
 
-    public LoginButtonClick(String username, String password) {
+    public LoginButtonClickEvent(String username, String password) {
         this.username = username;
         this.password = password;
     }

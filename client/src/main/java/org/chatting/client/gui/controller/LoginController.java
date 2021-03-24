@@ -14,7 +14,7 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import org.chatting.client.gui.EventQueue;
 import org.chatting.client.gui.event.Event;
-import org.chatting.client.gui.event.LoginButtonClick;
+import org.chatting.client.gui.event.LoginButtonClickEvent;
 import org.chatting.client.model.GUIModel;
 
 public class LoginController {
@@ -23,9 +23,9 @@ public class LoginController {
     private final GUIModel guiModel;
     private final Scene scene;
 
-    public LoginController(EventQueue eventQueue, GUIModel guiModel) {
-        this.eventQueue = eventQueue;
+    public LoginController(GUIModel guiModel, EventQueue eventQueue) {
         this.guiModel = guiModel;
+        this.eventQueue = eventQueue;
         this.scene = generateLoginScene();
     }
 
@@ -40,6 +40,7 @@ public class LoginController {
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
 
+        // Title
         final Text sceneTitle = new Text("Welcome");
         sceneTitle.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
         grid.add(sceneTitle, 0, 0, 2, 1);
@@ -56,9 +57,6 @@ public class LoginController {
         final PasswordField passwordField = new PasswordField();
         grid.add(passwordField, 1, 2);
 
-        final Text actiontarget = new Text();
-        grid.add(actiontarget, 1, 6);
-
         // Login Button
         final Button loginButton = new Button("Log in");
         final HBox hbBtn = new HBox(10);
@@ -69,9 +67,7 @@ public class LoginController {
         loginButton.setOnAction(e -> {
             final String username = usernameFiled.getText();
             final String password = passwordField.getText();
-            final Event loginButtonClick = new LoginButtonClick(username, password);
-//            final Event changeScene = new ChangeSceneEvent(SceneType.CHAT_ROOM);
-
+            final Event loginButtonClick = new LoginButtonClickEvent(username, password);
             eventQueue.pushEvent(loginButtonClick);
         });
 

@@ -13,18 +13,18 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.chatting.client.gui.EventQueue;
 import org.chatting.client.gui.event.Event;
-import org.chatting.client.gui.event.SendButtonClick;
+import org.chatting.client.gui.event.SendButtonClickEvent;
 import org.chatting.client.model.GUIModel;
 
 public class ChatRoomController {
 
+    private final GUIModel guiModel;
     private final EventQueue eventQueue;
     private final Scene scene;
-    private final GUIModel guiModel;
 
-    public ChatRoomController(EventQueue eventQueue, GUIModel guiModel) {
-        this.eventQueue = eventQueue;
+    public ChatRoomController(GUIModel guiModel, EventQueue eventQueue) {
         this.guiModel = guiModel;
+        this.eventQueue = eventQueue;
         this.scene = generateChatRoomScene();
     }
 
@@ -43,28 +43,27 @@ public class ChatRoomController {
         final Label usersTitleLabel = new Label();
         usersTitleLabel.setText("Connected users");
 
-        final ListView<String> usersList = new ListView<>();
-        usersList.setMinHeight(495);
-        usersList.setMinWidth(130);
-        usersList.setMaxWidth(120);
-        guiModel.setConnectedUsersListView(usersList);
+        final ListView<String> usersListView = new ListView<>();
+        usersListView.setMinHeight(495);
+        usersListView.setMinWidth(130);
+        usersListView.setMaxWidth(120);
+        guiModel.setConnectedUsersListView(usersListView);
 
         final VBox usersBox = new VBox();
         usersBox.getChildren().add(usersTitleLabel);
-        usersBox.getChildren().add(usersList);
+        usersBox.getChildren().add(usersListView);
         grid.add(usersBox, 0, 0);
 
         // Chat
-        final ListView<String> listView = new ListView<>();
-        listView.setMinWidth(1000);
-        listView.setMaxWidth(1000);
-        listView.setMinHeight(510);
-        guiModel.setChatMessagesListView(listView);
+        final ListView<String> chatListView = new ListView<>();
+        chatListView.setMinWidth(1000);
+        chatListView.setMaxWidth(1000);
+        chatListView.setMinHeight(510);
+        guiModel.setChatMessagesListView(chatListView);
 
         final HBox chatBox = new HBox();
-        chatBox.getChildren().add(listView);
+        chatBox.getChildren().add(chatListView);
         grid.add(chatBox, 1, 0);
-
 
         // Send text area
         final HBox sendTextBox = new HBox(10);
@@ -74,12 +73,11 @@ public class ChatRoomController {
         sendTextBox.getChildren().add(sendTextField);
         sendTextBox.getChildren().add(sendBtn);
         HBox.setHgrow(sendTextField, Priority.ALWAYS);
-
         grid.add(sendTextBox, 1, 1);
 
         sendBtn.setOnAction(e -> {
             final String text = sendTextField.getText();
-            final Event sendButtonClick = new SendButtonClick(text);
+            final Event sendButtonClick = new SendButtonClickEvent(text);
             eventQueue.pushEvent(sendButtonClick);
             sendTextField.clear();
         });
@@ -87,7 +85,7 @@ public class ChatRoomController {
         sendTextField.setOnKeyPressed(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {
                 final String text = sendTextField.getText();
-                final Event sendButtonClick = new SendButtonClick(text);
+                final Event sendButtonClick = new SendButtonClickEvent(text);
                 eventQueue.pushEvent(sendButtonClick);
                 sendTextField.clear();
             }

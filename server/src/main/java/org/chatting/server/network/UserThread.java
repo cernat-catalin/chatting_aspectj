@@ -1,7 +1,6 @@
 package org.chatting.server.network;
 
 import org.chatting.common.message.*;
-import org.chatting.server.database.DatabaseService;
 import org.chatting.server.model.User;
 
 import java.io.IOException;
@@ -11,8 +10,7 @@ import java.net.Socket;
 import java.util.Optional;
 
 public class UserThread extends Thread {
-    private final ChatServer server;
-    private final DatabaseService databaseService;
+    private final NetworkService server;
 
     private final ObjectInputStream reader;
     private final ObjectOutputStream writer;
@@ -20,10 +18,8 @@ public class UserThread extends Thread {
 
     private User user;
 
-    public UserThread(Socket socket, ChatServer server, DatabaseService databaseService) throws IOException {
+    public UserThread(Socket socket, NetworkService server) throws IOException {
         this.server = server;
-        this.databaseService = databaseService;
-
         this.reader = new ObjectInputStream(socket.getInputStream());
         this.writer = new ObjectOutputStream(socket.getOutputStream());
     }

@@ -7,7 +7,7 @@ import org.chatting.common.message.LoginMessage;
 import org.chatting.common.message.Message;
 import org.chatting.common.message.UserSendMessage;
 
-public class EventThread extends Thread {
+public class EventProcessor extends Thread {
 
     private static final int SLEEP_BETWEEN_READ_CHECKS = 100;
 
@@ -16,7 +16,7 @@ public class EventThread extends Thread {
     private final NetworkService networkService;
     private boolean shouldQuit = false;
 
-    public EventThread(EventQueue eventQueue, SceneManager sceneManager, NetworkService networkService) {
+    public EventProcessor(EventQueue eventQueue, SceneManager sceneManager, NetworkService networkService) {
         this.eventQueue = eventQueue;
         this.sceneManager = sceneManager;
         this.networkService = networkService;
@@ -25,13 +25,11 @@ public class EventThread extends Thread {
     public void run() {
         try {
             while (!shouldQuit) {
-                final boolean eventsAvailable = eventQueue.size() > 0;
-                if (eventsAvailable) {
+                while (eventQueue.size() > 0) {
                     final Event event = eventQueue.popEvent();
                     processEvent(event);
-                } else {
-                    Thread.sleep(SLEEP_BETWEEN_READ_CHECKS);
                 }
+                Thread.sleep(SLEEP_BETWEEN_READ_CHECKS);
             }
         } catch (InterruptedException ex) {
             System.out.println("Error reading from server: " + ex.getMessage());
@@ -43,33 +41,27 @@ public class EventThread extends Thread {
         switch (event.getEventType()) {
             case LOGIN_BUTTON_CLICK:
                 System.out.println("Login Button click !!!!");
-                final LoginButtonClick loginButtonClick = (LoginButtonClick) event;
-                final Message loginMessage = new LoginMessage(loginButtonClick.getUsername(), loginButtonClick.getPassword());
+                final LoginButtonClickEvent loginButtonClickEvent = (LoginButtonClickEvent) event;
+                final Message loginMessage = new LoginMessage(loginButtonClickEvent.getUsername(), loginButtonClickEvent.getPassword());
                 networkService.sendMessage(loginMessage);
                 break;
             case LOGIN_RESULT:
-                Platform.runLater(() -> {
-                    sceneManager.changeScene(SceneType.CHAT_ROOM);
-                });
+                Platform.runLater(() -> sceneManager.changeScene(SceneType.CHAT_ROOM));
                 break;
             case SEND_BUTTON_CLICK:
-                final SendButtonClick sendButtonClick = (SendButtonClick) event;
-                final String message = sendButtonClick.getTextFieldText();
+                final SendButtonClickEvent sendButtonClickEvent = (SendButtonClickEvent) event;
+                final String message = sendButtonClickEvent.getTextFieldText();
                 final Message userChatMessage = new UserSendMessage(message);
                 networkService.sendMessage(userChatMessage);
                 break;
             case CHAT_MESSAGE_RECEIVED:
-                final ChatMessageReceived chatMessageReceived = (ChatMessageReceived) event;
-                Platform.runLater(() -> {
-                    sceneManager.getGuiModel().addChatMessage(formatMessage(chatMessageReceived));
-                });
+                final ChatMessageReceivedEvent chatMessageReceivedEvent = (ChatMessageReceivedEvent) event;
+                Platform.runLater(() -> sceneManager.getGuiModel().addChatMessage(formatMessage(chatMessageReceivedEvent)));
                 break;
             case USER_LIST_RECEIVED:
-                System.out.printf("User List received");
-                final UserListReceived userListReceived = (UserListReceived) event;
-                Platform.runLater(() -> {
-                    sceneManager.getGuiModel().setConnectedUsers(userListReceived.getConnectedUsers());
-                });
+                System.out.println("User List received");
+                final UserListReceivedEvent userListReceivedEvent = (UserListReceivedEvent) event;
+                Platform.runLater(() -> sceneManager.getGuiModel().setConnectedUsers(userListReceivedEvent.getConnectedUsers()));
                 break;
             default:
                 throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + event.getEventType());
@@ -80,11 +72,11 @@ public class EventThread extends Thread {
         shouldQuit = true;
     }
 
-    private String formatMessage(ChatMessageReceived chatMessageReceived) {
-        if (chatMessageReceived.getAuthorType() == ChatMessageReceived.AuthorType.SERVER) {
-            return String.format("[SERVER]: %s", chatMessageReceived.getMessage());
+    private String formatMessage(ChatMessageReceivedEvent chatMessageReceivedEvent) {
+        if (chatMessageReceivedEvent.getAuthorType() == ChatMessageReceivedEvent.AuthorType.SERVER) {
+            return String.format("[SERVER]: %s", chatMessageReceivedEvent.getMessage());
         } else {
-            return String.format("%s: %s", chatMessageReceived.getAuthorName(), chatMessageReceived.getMessage());
+            return String.format("%s: %s", chatMessageReceivedEvent.getAuthorName(), chatMessageReceivedEvent.getMessage());
         }
     }
 }

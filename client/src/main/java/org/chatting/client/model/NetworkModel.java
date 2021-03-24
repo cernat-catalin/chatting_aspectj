@@ -2,11 +2,11 @@ package org.chatting.client.model;
 
 import org.chatting.common.message.Message;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class NetworkModel {
-    private final Collection<Message> pendingMessages = new ArrayList<>();
+    private final Queue<Message> pendingMessages = new ConcurrentLinkedQueue<>();
     private boolean shouldQuit;
 
     public boolean shouldQuit() {
@@ -18,22 +18,14 @@ public class NetworkModel {
     }
 
     public void sendMessage(Message message) {
-        synchronized (pendingMessages) {
-            pendingMessages.add(message);
-        }
+        pendingMessages.add(message);
     }
 
     public boolean hasPendingMessages() {
-        synchronized (pendingMessages) {
-            return pendingMessages.size() > 0;
-        }
+        return pendingMessages.size() > 0;
     }
 
-    public Collection<Message> clearPendingMessages() {
-        synchronized (pendingMessages) {
-            final Collection<Message> copy = new ArrayList<>(pendingMessages);
-            pendingMessages.clear();
-            return copy;
-        }
+    public Message popMessage() {
+        return pendingMessages.poll();
     }
 }
