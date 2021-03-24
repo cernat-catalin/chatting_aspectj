@@ -1,9 +1,11 @@
+package org.chatting.client;
+
 import javafx.application.Application;
 
 public class Main {
 
     public static void main(String[] args) {
-//        ClientState clientState = new ClientState();
+//        org.chatting.client.model.ClientState clientState = new org.chatting.client.model.ClientState();
 //        final String hostname = "localhost";
 //        final int port = 8000;
 //

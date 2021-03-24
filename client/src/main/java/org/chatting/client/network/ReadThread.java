@@ -1,3 +1,6 @@
+package org.chatting.client.network;
+
+import org.chatting.client.model.NetworkModel;
 import org.chatting.common.message.Message;
 import org.chatting.common.message.ServerAnnouncementMessage;
 
@@ -9,17 +12,17 @@ public class ReadThread extends Thread {
 
     private static final int SLEEP_BETWEEN_READ_CHECKS = 200;
 
-    private final ClientState clientState;
+    private final NetworkModel networkModel;
     private final ObjectInputStream reader;
 
-    public ReadThread(Socket socket, ClientState clientState) throws IOException {
-        this.clientState = clientState;
+    public ReadThread(Socket socket, NetworkModel networkModel) throws IOException {
+        this.networkModel = networkModel;
         this.reader = new ObjectInputStream(socket.getInputStream());
     }
 
     public void run() {
         try {
-            while (!clientState.shouldQuit()) {
+            while (!networkModel.shouldQuit()) {
                 final boolean readAvailable = reader.available() > 0;
                 if (readAvailable) {
                     final Object obj = reader.readObject();

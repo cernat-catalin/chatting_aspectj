@@ -1,3 +1,6 @@
+package org.chatting.client.network;
+
+import org.chatting.client.model.NetworkModel;
 import org.chatting.common.message.HandshakeMessage;
 import org.chatting.common.message.UserChatMessage;
 import org.chatting.common.message.UserQuitMessage;
@@ -7,11 +10,11 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class WriteThread extends Thread {
-    private final ClientState clientState;
+    private final NetworkModel networkModel;
     private final ObjectOutputStream writer;
 
-    public WriteThread(Socket socket, ClientState clientState) throws IOException {
-        this.clientState = clientState;
+    public WriteThread(Socket socket, NetworkModel networkModel) throws IOException {
+        this.networkModel = networkModel;
         writer = new ObjectOutputStream(socket.getOutputStream());
     }
 
@@ -24,15 +27,14 @@ public class WriteThread extends Thread {
             handshakeMessage.setDescription("Some description");
             writer.writeObject(handshakeMessage);
 
-            while (!clientState.shouldQuit()) {
-                if (clientState.hasMessagesToSend()) {
-                    clientState.clearToSendMessages().forEach(message -> {
+            while (!networkModel.shouldQuit()) {
+                if (networkModel.hasMessagesToSend()) {
+                    networkModel.clearToSendMessages().forEach(message -> {
                         final UserChatMessage userChatMessage = new UserChatMessage();
                         userChatMessage.setMessage(message);
                         try {
                             writer.writeObject(userChatMessage);
                         } catch (IOException e) {
-//                            clientState.setShouldQuit(true);
                             System.out.printf("Error while sending message %s\n", e);
                         }
                     });

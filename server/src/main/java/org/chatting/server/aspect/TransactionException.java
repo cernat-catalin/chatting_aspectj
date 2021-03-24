@@ -1,4 +1,4 @@
-package org.chatting.server.aspects;
+package org.chatting.server.aspect;
 
 public class TransactionException extends RuntimeException {
     public TransactionException(Throwable cause) {

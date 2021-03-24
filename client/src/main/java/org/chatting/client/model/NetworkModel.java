@@ -1,18 +1,11 @@
+package org.chatting.client.model;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class ClientState {
+public class NetworkModel {
     private final Collection<String> toSendMessages = new ArrayList<>();
-    private String userName;
     private boolean shouldQuit;
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
 
     public boolean shouldQuit() {
         return shouldQuit;

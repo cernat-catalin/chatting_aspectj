@@ -1,20 +1,24 @@
+package org.chatting.client.network;
+
+import org.chatting.client.model.NetworkModel;
+
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-public class ChatClient {
+public class NetworkService {
     private final String hostname;
     private final int port;
-    private final ClientState clientState;
+    private final NetworkModel networkModel;
 
     private Socket socket;
     private WriteThread writeThread;
     private ReadThread readThread;
 
-    public ChatClient(String hostname, int port, ClientState clientState) {
+    public NetworkService(String hostname, int port, NetworkModel networkModel) {
         this.hostname = hostname;
         this.port = port;
-        this.clientState = clientState;
+        this.networkModel = networkModel;
     }
 
     public void start() {
@@ -22,8 +26,8 @@ public class ChatClient {
             this.socket = new Socket(hostname, port);
             System.out.println("Connected to the chat server");
 
-            this.writeThread = new WriteThread(socket, clientState);
-            this.readThread = new ReadThread(socket, clientState);
+            this.writeThread = new WriteThread(socket, networkModel);
+            this.readThread = new ReadThread(socket, networkModel);
 
             writeThread.start();
             readThread.start();
@@ -37,12 +41,16 @@ public class ChatClient {
 
     public void stop() {
         try {
-            clientState.setShouldQuit(true);
+            networkModel.setShouldQuit(true);
             writeThread.join();
             readThread.join();
             socket.close();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    public void sendMessage(String message) {
+        networkModel.addMessageToSend(message);
     }
 }

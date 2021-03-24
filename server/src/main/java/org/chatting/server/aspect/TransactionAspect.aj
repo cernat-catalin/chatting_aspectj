@@ -1,4 +1,4 @@
-package org.chatting.server.aspects;
+package org.chatting.server.aspect;
 
 import java.sql.Connection;
 
@@ -44,12 +44,12 @@ public aspect TransactionAspect percflow(topLevelTransaction()) {
         }
     }
 
-    void around(): closeConnection() && !within(org.chatting.server.aspects.TransactionAspect) {
+    void around(): closeConnection() && !within(org.chatting.server.aspect.TransactionAspect) {
     }
 
     declare soft:java.sql.SQLException:
             call (void Connection.close())
                     || call (void Connection.setAutoCommit(boolean))
                     || call (void Connection.rollback())
-                    && within(org.chatting.server.aspects.TransactionAspect);
+                    && within(org.chatting.server.aspect.TransactionAspect);
 }

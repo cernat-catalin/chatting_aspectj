@@ -1,7 +1,9 @@
+package org.chatting.client;
+
 public class Hello {
 
     public void sayHello() {
-        System.out.print("Saying hello from class Hello\n");
+        System.out.print("Saying hello from class org.chatting.client.Hello\n");
     }
 
     public void printString(String a) {
