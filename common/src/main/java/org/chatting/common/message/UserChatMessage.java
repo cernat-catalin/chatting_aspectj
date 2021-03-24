@@ -3,6 +3,7 @@ package org.chatting.common.message;
 import java.io.Serializable;
 
 public class UserChatMessage implements Message, Serializable {
+
     public String message;
 
     @Override

@@ -1,11 +1,11 @@
 # Database generation
 
-## org.chatting.server.User table
+## User table
 
 DDL
 
 ```sqlite
-CREATE TABLE user
+CREATE TABLE userEntity
 (
     id  INTEGER PRIMARY KEY AUTOINCREMENT,
     username text NOT NULL,

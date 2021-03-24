@@ -3,6 +3,8 @@ package org.chatting.client.gui;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.chatting.client.gui.controller.ChatRoomController;
+import org.chatting.client.gui.controller.LoginController;
 
 public class SceneManager {
     private final EventQueue eventQueue;

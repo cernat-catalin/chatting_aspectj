@@ -1,13 +1,13 @@
 package org.chatting.client.network;
 
 import org.chatting.client.model.NetworkModel;
-import org.chatting.common.message.HandshakeMessage;
-import org.chatting.common.message.UserChatMessage;
-import org.chatting.common.message.UserQuitMessage;
+import org.chatting.common.message.Message;
+import org.chatting.common.message.UserDisconnectedMessage;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Collection;
 
 public class WriteThread extends Thread {
     private final NetworkModel networkModel;
@@ -19,31 +19,18 @@ public class WriteThread extends Thread {
     }
 
     public void run() {
-        final String userName = "Catalin";
-
         try {
-            final HandshakeMessage handshakeMessage = new HandshakeMessage();
-            handshakeMessage.setName(userName);
-            handshakeMessage.setDescription("Some description");
-            writer.writeObject(handshakeMessage);
-
             while (!networkModel.shouldQuit()) {
-                if (networkModel.hasMessagesToSend()) {
-                    networkModel.clearToSendMessages().forEach(message -> {
-                        final UserChatMessage userChatMessage = new UserChatMessage();
-                        userChatMessage.setMessage(message);
-                        try {
-                            writer.writeObject(userChatMessage);
-                        } catch (IOException e) {
-                            System.out.printf("Error while sending message %s\n", e);
-                        }
-                    });
+                if (networkModel.hasPendingMessages()) {
+                    final Collection<Message> messages = networkModel.clearPendingMessages();
+                    for (Message message : messages) {
+                        writer.writeObject(message);
+                    }
                 } else {
                     Thread.sleep(100);
                 }
             }
-
-            quit();
+            handleDisconnect();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         } finally {
@@ -55,8 +42,8 @@ public class WriteThread extends Thread {
         }
     }
 
-    public void quit() throws IOException {
-        final UserQuitMessage userQuitMessage = new UserQuitMessage();
-        writer.writeObject(userQuitMessage);
+    private void handleDisconnect() throws IOException {
+        final UserDisconnectedMessage userDisconnectedMessage = new UserDisconnectedMessage();
+        writer.writeObject(userDisconnectedMessage);
     }
 }

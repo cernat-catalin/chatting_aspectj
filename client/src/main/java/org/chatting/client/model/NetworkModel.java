@@ -1,10 +1,12 @@
 package org.chatting.client.model;
 
+import org.chatting.common.message.Message;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class NetworkModel {
-    private final Collection<String> toSendMessages = new ArrayList<>();
+    private final Collection<Message> pendingMessages = new ArrayList<>();
     private boolean shouldQuit;
 
     public boolean shouldQuit() {
@@ -15,22 +17,22 @@ public class NetworkModel {
         this.shouldQuit = shouldQuit;
     }
 
-    public void addMessageToSend(String message) {
-        synchronized (toSendMessages) {
-            toSendMessages.add(message);
+    public void sendMessage(Message message) {
+        synchronized (pendingMessages) {
+            pendingMessages.add(message);
         }
     }
 
-    public boolean hasMessagesToSend() {
-        synchronized (toSendMessages) {
-            return toSendMessages.size() > 0;
+    public boolean hasPendingMessages() {
+        synchronized (pendingMessages) {
+            return pendingMessages.size() > 0;
         }
     }
 
-    public Collection<String> clearToSendMessages() {
-        synchronized (toSendMessages) {
-            final Collection<String> copy = new ArrayList<>(toSendMessages);
-            toSendMessages.clear();
+    public Collection<Message> clearPendingMessages() {
+        synchronized (pendingMessages) {
+            final Collection<Message> copy = new ArrayList<>(pendingMessages);
+            pendingMessages.clear();
             return copy;
         }
     }

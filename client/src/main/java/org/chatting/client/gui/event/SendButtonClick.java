@@ -1,4 +1,4 @@
-package org.chatting.client.gui;
+package org.chatting.client.gui.event;
 
 public class SendButtonClick implements Event {
 

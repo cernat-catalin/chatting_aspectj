@@ -20,9 +20,9 @@ public class App extends Application {
         final String hostname = "localhost";
         final int port = 8000;
         this.networkModel = new NetworkModel();
-        this.networkService = new NetworkService(hostname, port, networkModel);
 
         final EventQueue eventQueue = new EventQueue();
+        this.networkService = new NetworkService(hostname, port, networkModel, eventQueue);
 
         this.sceneManager = new SceneManager(eventQueue);
         this.eventThread = new EventThread(eventQueue, sceneManager, networkService);
@@ -30,9 +30,6 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        final Hello hello = new Hello();
-        hello.sayHello();
-
         networkService.start();
         eventThread.start();
 
@@ -44,6 +41,6 @@ public class App extends Application {
     @Override
     public void stop() {
         networkService.stop();
-        // TODO Need to stop the event thread
+        eventThread.stopProcessing();
     }
 }

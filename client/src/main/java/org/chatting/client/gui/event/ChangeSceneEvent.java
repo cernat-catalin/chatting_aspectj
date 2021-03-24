@@ -1,4 +1,6 @@
-package org.chatting.client.gui;
+package org.chatting.client.gui.event;
+
+import org.chatting.client.gui.SceneType;
 
 public class ChangeSceneEvent implements Event {
 
@@ -10,7 +12,7 @@ public class ChangeSceneEvent implements Event {
 
     @Override
     public EventType getEventType() {
-        return EventType.CHANGE_PANEL;
+        return EventType.CHANGE_SCENE;
     }
 
     public SceneType getSceneType() {

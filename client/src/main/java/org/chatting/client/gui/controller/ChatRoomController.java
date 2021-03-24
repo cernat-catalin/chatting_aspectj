@@ -1,4 +1,4 @@
-package org.chatting.client.gui;
+package org.chatting.client.gui.controller;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -9,6 +9,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import org.chatting.client.gui.EventQueue;
+import org.chatting.client.gui.SceneType;
+import org.chatting.client.gui.event.ChangeSceneEvent;
+import org.chatting.client.gui.event.Event;
+import org.chatting.client.gui.event.SendButtonClick;
 
 public class ChatRoomController {
 

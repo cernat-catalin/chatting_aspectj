@@ -1,5 +1,7 @@
 package org.chatting.client.gui;
 
+import org.chatting.client.gui.event.Event;
+
 import java.util.LinkedList;
 import java.util.Queue;
 

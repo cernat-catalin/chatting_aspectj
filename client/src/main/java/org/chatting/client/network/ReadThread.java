@@ -1,37 +1,41 @@
 package org.chatting.client.network;
 
+import org.chatting.client.gui.EventQueue;
+import org.chatting.client.gui.event.Event;
+import org.chatting.client.gui.event.LoginResultEvent;
 import org.chatting.client.model.NetworkModel;
+import org.chatting.common.message.LoginResultMessage;
 import org.chatting.common.message.Message;
 import org.chatting.common.message.ServerAnnouncementMessage;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ReadThread extends Thread {
 
-    private static final int SLEEP_BETWEEN_READ_CHECKS = 200;
-
     private final NetworkModel networkModel;
+    private final EventQueue eventQueue;
     private final ObjectInputStream reader;
 
-    public ReadThread(Socket socket, NetworkModel networkModel) throws IOException {
+    public ReadThread(Socket socket, NetworkModel networkModel, EventQueue eventQueue) throws IOException {
         this.networkModel = networkModel;
+        this.eventQueue = eventQueue;
         this.reader = new ObjectInputStream(socket.getInputStream());
     }
 
     public void run() {
         try {
             while (!networkModel.shouldQuit()) {
-                final boolean readAvailable = reader.available() > 0;
-                if (readAvailable) {
-                    final Object obj = reader.readObject();
-                    processMessage(obj);
-                } else {
-                    Thread.sleep(SLEEP_BETWEEN_READ_CHECKS);
-                }
+                final Object obj = reader.readObject();
+                processMessage(obj);
             }
-        } catch (IOException | ClassNotFoundException | InterruptedException ex) {
+        } catch (SocketException ignored) {
+            if (!networkModel.shouldQuit()) {
+                throw new RuntimeException("Socket exception before client close");
+            }
+        } catch (IOException | ClassNotFoundException ex) {
             System.out.println("Error reading from server: " + ex.getMessage());
             ex.printStackTrace();
         } finally {
@@ -53,6 +57,13 @@ public class ReadThread extends Thread {
             case SERVER_ANNOUNCEMENT:
                 final ServerAnnouncementMessage serverAnnouncementMessage = (ServerAnnouncementMessage) message;
                 System.out.println("\n" + serverAnnouncementMessage.getAnnouncement());
+                break;
+            case LOGIN_RESULT:
+                System.out.printf("Received login result message\n");
+                final LoginResultMessage loginResultMessage = (LoginResultMessage) message;
+
+                final Event loginResultEvent = new LoginResultEvent(loginResultMessage.isLoginAccepted());
+                eventQueue.pushEvent(loginResultEvent);
                 break;
             default:
                 throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + message.getMessageType());

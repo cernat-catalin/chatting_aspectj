@@ -7,15 +7,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Optional;
 
 public class QueryExecutor {
 
-    public <T> T getResultSingle(String query, EntityMapper<T> entityMapper) {
+    public <T> Optional<T> getResultSingle(String query, EntityMapper<T> entityMapper) {
         final Connection connection = DatabaseSource.createConnection();
         try {
             final Statement statement = connection.createStatement();
             final ResultSet resultSet = statement.executeQuery(query);
-            final T result = entityMapper.extractSingle(resultSet);
+            final Optional<T> result = entityMapper.extractSingle(resultSet);
 
             resultSet.close();
             statement.close();
@@ -42,5 +43,9 @@ public class QueryExecutor {
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
         }
+    }
+
+    public void executeQuery(String query) {
+
     }
 }

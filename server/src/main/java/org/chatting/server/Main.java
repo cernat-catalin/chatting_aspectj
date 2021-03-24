@@ -1,24 +1,22 @@
 package org.chatting.server;
 
 import org.chatting.server.database.DatabaseService;
+import org.chatting.server.entity.UserEntity;
+import org.chatting.server.network.ChatServer;
+
+import java.util.Optional;
 
 public class Main {
 
     public static void main(String[] args) {
-//        if (args.length < 1) {
-//            System.out.println("Syntax: java org.chatting.server.ChatServer <port-number>");
-//            System.exit(0);
-//        }
-//
-//        int port = Integer.parseInt(args[0]);
-
-        final HelloServer helloServer = new HelloServer();
-        helloServer.sayHello();
-
         final DatabaseService databaseService = new DatabaseService();
-//        final User user = databaseService.getAllUsers();
-        final User user = databaseService.getUserByUsername("catalin");
-        System.out.printf("User: %d %s %s\n", user.getId(), user.getUsername(), user.getPassword());
+
+//        final Optional<UserEntity> userEntityOpt = databaseService.getUserByUsername("catalin");
+//        final Optional<UserEntity> userEntityOpt = databaseService.getUserByUsername("catalin2");
+
+//        userEntityOpt.ifPresent(userEntity -> {
+//            System.out.printf("User: %d %s %s\n", userEntity.getId(), userEntity.getUsername(), userEntity.getPassword());
+//        });
 
         final int port = 8000;
         final ChatServer chatServer = new ChatServer(port);

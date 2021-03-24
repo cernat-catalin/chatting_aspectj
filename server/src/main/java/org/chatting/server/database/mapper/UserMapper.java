@@ -1,44 +1,48 @@
 package org.chatting.server.database.mapper;
 
-import org.chatting.server.User;
+import org.chatting.server.entity.UserEntity;
 import org.chatting.server.database.DatabaseException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-public class UserMapper implements EntityMapper<User> {
+public class UserMapper implements EntityMapper<UserEntity> {
 
     @Override
-    public User extractSingle(ResultSet resultSet) {
+    public Optional<UserEntity> extractSingle(ResultSet resultSet) {
         try {
-            return extractUser(resultSet);
+            if (resultSet.next()) {
+                return Optional.of(extractUser(resultSet));
+            }
+            return Optional.empty();
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
         }
     }
 
     @Override
-    public List<User> extractList(ResultSet resultSet) {
+    public List<UserEntity> extractList(ResultSet resultSet) {
         try {
-            final List<User> users = new ArrayList<>();
+            final List<UserEntity> userEntities = new ArrayList<>();
 
             while (resultSet.next()) {
-                final User user = extractUser(resultSet);
-                users.add(user);
+                final UserEntity userEntity = extractUser(resultSet);
+                userEntities.add(userEntity);
             }
 
-            return users;
+            return userEntities;
         } catch (SQLException ex) {
             throw new DatabaseException(ex);
         }
     }
 
-    private User extractUser(ResultSet resultSet) throws SQLException {
+    private UserEntity extractUser(ResultSet resultSet) throws SQLException {
         final int id = resultSet.getInt("id");
         final String username = resultSet.getString("username");
         final String password = resultSet.getString("password");
-        return new User(id, username, password);
+        return new UserEntity(id, username, password);
     }
 }
