@@ -25,7 +25,7 @@ public class WriteThread extends Thread {
             while (!networkModel.shouldQuit()) {
                 while (networkModel.hasPendingMessages()) {
                     final Message message = networkModel.popMessage();
-                    writer.writeObject(message);
+                    sendMessage(message);
                 }
                 Thread.sleep(SLEEP_BETWEEN_EVENT_CHECKS);
             }
@@ -44,5 +44,9 @@ public class WriteThread extends Thread {
     private void handleDisconnect() throws IOException {
         final UserDisconnectedMessage userDisconnectedMessage = new UserDisconnectedMessage();
         writer.writeObject(userDisconnectedMessage);
+    }
+
+    private void sendMessage(Message message) throws IOException {
+        writer.writeObject(message);
     }
 }

@@ -46,6 +46,15 @@ public class QueryExecutor {
     }
 
     public void executeQuery(String query) {
+        final Connection connection = DatabaseSource.createConnection();
+        try {
+            final Statement statement = connection.createStatement();
+            statement.executeUpdate(query);
 
+            statement.close();
+            connection.close();
+        } catch (SQLException ex) {
+            throw new DatabaseException(ex);
+        }
     }
 }

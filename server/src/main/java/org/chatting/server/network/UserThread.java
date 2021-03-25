@@ -1,16 +1,20 @@
 package org.chatting.server.network;
 
 import org.chatting.common.message.*;
+import org.chatting.server.InvalidCredentialsException;
+import org.chatting.server.UserNotFoundException;
+import org.chatting.server.aspect.TransactionException;
+import org.chatting.server.database.DatabaseService;
 import org.chatting.server.model.User;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.Optional;
 
 public class UserThread extends Thread {
     private final NetworkService server;
+    private final DatabaseService databaseService;
 
     private final ObjectInputStream reader;
     private final ObjectOutputStream writer;
@@ -18,30 +22,27 @@ public class UserThread extends Thread {
 
     private User user;
 
-    public UserThread(Socket socket, NetworkService server) throws IOException {
+    public UserThread(Socket socket, NetworkService server, DatabaseService databaseService) throws IOException {
         this.server = server;
+        this.databaseService = databaseService;
         this.reader = new ObjectInputStream(socket.getInputStream());
         this.writer = new ObjectOutputStream(socket.getOutputStream());
     }
 
     public void run() {
         try {
-            final Optional<User> userOpt = handleUserLogin();
-            if (userOpt.isEmpty()) {
-                System.out.println("User disconnected before login!");
-            } else {
-                sendLoginResult();
-                user = userOpt.get();
-                server.sendConnectedUsersList();
-                final String announcement = String.format("%s has joined the chat!", user.getUsername());
-                final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.SERVER, "Server", announcement);
-                server.broadcast(chatMessage);
-                do {
-                    final Object obj = reader.readObject();
-                    processMessage(obj);
-                } while (!shouldQuit);
-            }
-        } catch (IOException | ClassNotFoundException ex) {
+            do {
+                final Object obj = reader.readObject();
+                if (!(obj instanceof Message)) {
+                    throw new RuntimeException("Wrong message type. Should inherit from Message. Object: " + obj);
+                }
+                processMessage((Message) obj);
+            } while (!shouldQuit);
+        }
+//        catch (UserNotFoundException | InvalidCredentialsException ex) {
+//            System.out.printf("User credentials exception: s\n");
+//        }
+        catch (Exception ex) {
             System.out.println("Error in org.chatting.server.network.UserThread. Will remove user. Error was: " + ex.getMessage());
         } finally {
             handleUserRemove();
@@ -52,32 +53,27 @@ public class UserThread extends Thread {
         server.removeUser(this);
     }
 
-    private Optional<User> handleUserLogin() throws IOException, ClassNotFoundException {
-        final Object obj = reader.readObject();
-        if (obj instanceof LoginMessage) {
-            final LoginMessage loginMessage = (LoginMessage) obj;
-            System.out.printf("Received login message from user: %s", loginMessage.getUsername());
-            final String username = loginMessage.getUsername();
-            final String password = loginMessage.getPassword();
-            return Optional.of(new User(username, password));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    private void sendLoginResult() throws IOException {
+    public void sendLoginResult(boolean result) throws IOException {
         System.out.println("Sencding login result message");
-        final Message loginResultMessage = new LoginResultMessage(true);
+        final Message loginResultMessage = new LoginResultMessage(result);
         sendMessage(loginResultMessage);
     }
 
-    private void processMessage(Object obj) throws IOException {
-        if (!(obj instanceof Message)) {
-            throw new RuntimeException("Wrong message type. Should inherit from Message. Object: " + obj);
-        }
+    private void sendSingUpResult(boolean result) throws IOException {
+        System.out.println("Sending signup result message");
+        final Message signupResultMessage = new SignupResultMessage(result);
+        sendMessage(signupResultMessage);
+    }
 
-        final Message message = (Message) obj;
+    private void processMessage(Message message) throws IOException {
         switch (message.getMessageType()) {
+            case LOGIN:
+                handleUserLogin((LoginMessage) message);
+                break;
+            case SIGN_UP:
+                final boolean createdUser = handleUserSignup((SignupMessage) message);
+                sendSingUpResult(createdUser);
+                break;
             case USER_SEND_MESSAGE:
                 final UserSendMessage userSendMessage = (UserSendMessage) message;
                 final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.USER,
@@ -98,5 +94,34 @@ public class UserThread extends Thread {
 
     public User getUser() {
         return user;
+    }
+
+    private void handleUserLogin(LoginMessage loginMessage) throws IOException {
+        this.user = constructUser(loginMessage);
+        sendLoginResult(true);
+
+        server.sendConnectedUsersList();
+        final String announcement = String.format("%s has joined the chat!", user.getUsername());
+        final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.SERVER, "Server", announcement);
+        server.broadcast(chatMessage);
+    }
+
+    private User constructUser(LoginMessage loginMessage) {
+        System.out.printf("Received login message from user: %s", loginMessage.getUsername());
+        final String username = loginMessage.getUsername();
+        final String password = loginMessage.getPassword();
+        return new User(username, password);
+    }
+
+    private boolean handleUserSignup(SignupMessage signupMessage) {
+        System.out.printf("Handling user signup\n");
+        final String username = signupMessage.getUsername();
+        final String password = signupMessage.getPassword();
+        try {
+            databaseService.addUser(username, password);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 }

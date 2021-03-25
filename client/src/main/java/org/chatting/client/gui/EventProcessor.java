@@ -5,6 +5,7 @@ import org.chatting.client.gui.event.*;
 import org.chatting.client.network.NetworkService;
 import org.chatting.common.message.LoginMessage;
 import org.chatting.common.message.Message;
+import org.chatting.common.message.SignupMessage;
 import org.chatting.common.message.UserSendMessage;
 
 public class EventProcessor extends Thread {
@@ -40,13 +41,32 @@ public class EventProcessor extends Thread {
     private void processEvent(Event event) {
         switch (event.getEventType()) {
             case LOGIN_BUTTON_CLICK:
-                System.out.println("Login Button click !!!!");
                 final LoginButtonClickEvent loginButtonClickEvent = (LoginButtonClickEvent) event;
                 final Message loginMessage = new LoginMessage(loginButtonClickEvent.getUsername(), loginButtonClickEvent.getPassword());
                 networkService.sendMessage(loginMessage);
                 break;
             case LOGIN_RESULT:
-                Platform.runLater(() -> sceneManager.changeScene(SceneType.CHAT_ROOM));
+                final LoginResultEvent loginResultEvent = (LoginResultEvent) event;
+                Platform.runLater(() -> {
+                    if (loginResultEvent.isLoginAccepted()) {
+                        sceneManager.getGuiModel().clearLoginError();
+                        sceneManager.changeScene(SceneType.CHAT_ROOM);
+                    } else {
+                        sceneManager.getGuiModel().setLoginError();
+                    }
+                });
+                break;
+            case SIGN_UP_RESULT:
+                final SignupResultEvent signupResultEvent = (SignupResultEvent) event;
+                Platform.runLater(() -> {
+                    if (signupResultEvent.isSignupAccepted()) {
+                        sceneManager.getGuiModel().clearSignupError();
+                        sceneManager.getGuiModel().clearLoginError();
+                        sceneManager.changeScene(SceneType.LOGIN);
+                    } else {
+                        sceneManager.getGuiModel().setSignupError();
+                    }
+                });
                 break;
             case SEND_BUTTON_CLICK:
                 final SendButtonClickEvent sendButtonClickEvent = (SendButtonClickEvent) event;
@@ -59,9 +79,17 @@ public class EventProcessor extends Thread {
                 Platform.runLater(() -> sceneManager.getGuiModel().addChatMessage(formatMessage(chatMessageReceivedEvent)));
                 break;
             case USER_LIST_RECEIVED:
-                System.out.println("User List received");
                 final UserListReceivedEvent userListReceivedEvent = (UserListReceivedEvent) event;
                 Platform.runLater(() -> sceneManager.getGuiModel().setConnectedUsers(userListReceivedEvent.getConnectedUsers()));
+                break;
+            case CHANGE_SCENE:
+                final ChangeSceneEvent changeSceneEvent = (ChangeSceneEvent) event;
+                Platform.runLater(() -> sceneManager.changeScene(changeSceneEvent.getSceneType()));
+                break;
+            case SIGN_UP_BUTTON_CLICK:
+                final SignUpButtonClickEvent signUpButtonClickEvent = (SignUpButtonClickEvent) event;
+                final Message signupMessage = new SignupMessage(signUpButtonClickEvent.getUsername(), signUpButtonClickEvent.getPassword());
+                networkService.sendMessage(signupMessage);
                 break;
             default:
                 throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + event.getEventType());

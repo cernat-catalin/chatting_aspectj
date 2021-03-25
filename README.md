@@ -22,7 +22,8 @@ Things to introduce:
 Where to use aspects:
 * [DONE] Transaction management
 * [ ] Security aspect
-* [ ] Event Logging aspect
+* [DONE] Event Logging aspect
+* [ ] Message Logging aspect
 * [ ] General logging aspect
 * [ ] Performance aspect
 * [ ] Error Handling aspect

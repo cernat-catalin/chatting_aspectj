@@ -1,15 +1,9 @@
 package org.chatting.client.network;
 
 import org.chatting.client.gui.EventQueue;
-import org.chatting.client.gui.event.ChatMessageReceivedEvent;
-import org.chatting.client.gui.event.Event;
-import org.chatting.client.gui.event.LoginResultEvent;
-import org.chatting.client.gui.event.UserListReceivedEvent;
+import org.chatting.client.gui.event.*;
 import org.chatting.client.model.NetworkModel;
-import org.chatting.common.message.ChatMessage;
-import org.chatting.common.message.LoginResultMessage;
-import org.chatting.common.message.Message;
-import org.chatting.common.message.UserListMessage;
+import org.chatting.common.message.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -32,7 +26,10 @@ public class ReadThread extends Thread {
         try {
             while (!networkModel.shouldQuit()) {
                 final Object obj = reader.readObject();
-                processMessage(obj);
+                if (!(obj instanceof Message)) {
+                    throw new RuntimeException("Wrong message type. Should inherit from Message. Object: " + obj);
+                }
+                processMessage((Message) obj);
             }
         } catch (SocketException ignored) {
             if (!networkModel.shouldQuit()) {
@@ -50,12 +47,7 @@ public class ReadThread extends Thread {
         }
     }
 
-    private void processMessage(Object obj) {
-        if (!(obj instanceof Message)) {
-            throw new RuntimeException("Wrong message type. Should inherit from Message. Object: " + obj);
-        }
-
-        final Message message = (Message) obj;
+    private void processMessage(Message message) {
         switch (message.getMessageType()) {
             case CHAT_MESSAGE:
                 final ChatMessage chatMessage = (ChatMessage) message;
@@ -68,14 +60,16 @@ public class ReadThread extends Thread {
                 eventQueue.pushEvent(chatMessageReceived);
                 break;
             case LOGIN_RESULT:
-                System.out.printf("Received login result message\n");
                 final LoginResultMessage loginResultMessage = (LoginResultMessage) message;
-
                 final Event loginResultEvent = new LoginResultEvent(loginResultMessage.isLoginAccepted());
                 eventQueue.pushEvent(loginResultEvent);
                 break;
+            case SIGN_UP_RESULT:
+                final SignupResultMessage signupResultMessage = (SignupResultMessage) message;
+                final Event signupResultEvent = new SignupResultEvent(signupResultMessage.isSignupResult());
+                eventQueue.pushEvent(signupResultEvent);
+                break;
             case USER_LIST:
-                System.out.printf("User list received network");
                 final UserListMessage userListMessage = (UserListMessage) message;
                 final Event userListReceived = new UserListReceivedEvent(userListMessage.getConnectedUsers());
                 eventQueue.pushEvent(userListReceived);
@@ -83,6 +77,5 @@ public class ReadThread extends Thread {
             default:
                 throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + message.getMessageType());
         }
-
     }
 }

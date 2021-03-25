@@ -33,9 +33,11 @@ public aspect TransactionAspect percflow(topLevelTransaction()) {
         System.out.println("---- ADVICE TOP LEVEL");
         try {
             Object result = proceed();
+            System.out.println("---- ADVICE COMMIT");
             connection.commit();
             return result;
         } catch (Exception ex) {
+            System.out.println("---- ADVICE ROLLBACK");
             connection.rollback();
             throw new TransactionException(ex);
         } finally {

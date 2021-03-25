@@ -2,6 +2,7 @@ package org.chatting.server.network;
 
 import org.chatting.common.message.Message;
 import org.chatting.common.message.UserListMessage;
+import org.chatting.server.database.DatabaseService;
 import org.chatting.server.model.User;
 
 import java.io.IOException;
@@ -15,9 +16,11 @@ import java.util.stream.Collectors;
 public class NetworkService {
     private final int port;
     private final Set<UserThread> userThreads = new HashSet<>();
+    private final DatabaseService databaseService;
 
-    public NetworkService(int port) {
+    public NetworkService(int port, DatabaseService databaseService) {
         this.port = port;
+        this.databaseService = databaseService;
     }
 
     public void start() {
@@ -28,7 +31,7 @@ public class NetworkService {
                 final Socket socket = serverSocket.accept();
                 System.out.println("New user connected");
 
-                final UserThread newUser = new UserThread(socket, this);
+                final UserThread newUser = new UserThread(socket, this, databaseService);
                 userThreads.add(newUser);
                 newUser.start();
             }

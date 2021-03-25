@@ -1,5 +1,7 @@
 package org.chatting.client.model;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.scene.control.ListView;
 
@@ -9,6 +11,8 @@ public class GUIModel {
 
     private ListView<String> chatMessagesListView;
     private ListView<String> connectedUsersListView;
+    private StringProperty loginError = new SimpleStringProperty();
+    private StringProperty signupError = new SimpleStringProperty();
 
     public void setChatMessagesListView(ListView<String> chatMessagesListView) {
         this.chatMessagesListView = chatMessagesListView;
@@ -25,5 +29,29 @@ public class GUIModel {
 
     public void setConnectedUsers(List<String> connectedUsers) {
         connectedUsersListView.setItems(FXCollections.observableArrayList(connectedUsers));
+    }
+
+    public StringProperty getLoginError() {
+        return loginError;
+    }
+
+    public void setLoginError() {
+        loginError.set("Invalid credentials");
+    }
+
+    public void clearLoginError() {
+        loginError.set("");
+    }
+
+    public StringProperty getSignupError() {
+        return signupError;
+    }
+
+    public void setSignupError() {
+        signupError.set("Something went wrong!");
+    }
+
+    public void clearSignupError() {
+        signupError.set("");
     }
 }

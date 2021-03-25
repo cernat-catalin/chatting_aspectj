@@ -5,11 +5,13 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.chatting.client.gui.controller.ChatRoomController;
 import org.chatting.client.gui.controller.LoginController;
+import org.chatting.client.gui.controller.SignUpController;
 import org.chatting.client.model.GUIModel;
 
 public class SceneManager {
     private final LoginController loginController;
     private final ChatRoomController chatRoomController;
+    private final SignUpController signUpController;
     private final GUIModel guiModel;
     private Scene currentScene;
 
@@ -17,6 +19,7 @@ public class SceneManager {
         this.guiModel = new GUIModel();
         this.loginController = new LoginController(guiModel, eventQueue);
         this.chatRoomController = new ChatRoomController(guiModel, eventQueue);
+        this.signUpController = new SignUpController(guiModel, eventQueue);
         this.currentScene = loginController.getScene();
     }
 
@@ -31,6 +34,9 @@ public class SceneManager {
                 break;
             case CHAT_ROOM:
                 changeCurrentScene(chatRoomController.getScene());
+                break;
+            case SIGN_UP:
+                changeCurrentScene(signUpController.getScene());
                 break;
         }
     }
