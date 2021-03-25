@@ -1,10 +1,11 @@
 package org.chatting.server.database;
 
 import org.chatting.server.database.mapper.UserMapper;
+import org.chatting.server.database.mapper.UserStatisticsMapper;
 import org.chatting.server.entity.UserEntity;
+import org.chatting.server.entity.UserStatisticsEntity;
 
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Optional;
 
 public class DatabaseService {
@@ -13,14 +14,8 @@ public class DatabaseService {
     public Optional<UserEntity> getUserByUsername(String username) {
         final String query = MessageFormat.format("SELECT id, username, password FROM user WHERE username = ''{0}''",
                 username);
-        final UserMapper userMapper = new UserMapper();
-        return queryExecutor.getResultSingle(query, userMapper);
-    }
-
-    public List<UserEntity> getAllUsers() {
-        final String query = "SELECT id, username, password FROM user";
-        final UserMapper userMapper = new UserMapper();
-        return queryExecutor.getResultList(query, userMapper);
+        final UserMapper mapper = new UserMapper();
+        return queryExecutor.getResultSingle(query, mapper);
     }
 
     public void addUser(String username, String password) {
@@ -37,15 +32,22 @@ public class DatabaseService {
         queryExecutor.executeQuery(query);
     }
 
-    public void incrementUserLogins(int userId) {
-        final String query = MessageFormat.format("UPDATE user_statistics SET n_logins = n_logins + 1 WHERE user_id = {0}",
-                userId);
+    public Optional<UserStatisticsEntity> getUserStatistics(String username) {
+        final String query = MessageFormat.format("SELECT n_logins, n_messages FROM user_statistics where user_id IN (SELECT id FROM user WHERE username = ''{0}'')",
+                username);
+        final UserStatisticsMapper mapper = new UserStatisticsMapper();
+        return queryExecutor.getResultSingle(query, mapper);
+    }
+
+    public void incrementUserLogins(String username) {
+        final String query = MessageFormat.format("UPDATE user_statistics SET n_logins = n_logins + 1 WHERE user_id IN (SELECT id FROM user WHERE username = ''{0}'')",
+                username);
         queryExecutor.executeQuery(query);
     }
 
-    public void incrementUserMessages(int userId) {
-        final String query = MessageFormat.format("UPDATE user_statistics SET n_messages = n_messages + 1 WHERE user_id = {0}",
-                userId);
+    public void incrementUserMessages(String username) {
+        final String query = MessageFormat.format("UPDATE user_statistics SET n_messages = n_messages + 1 WHERE user_id IN (SELECT id FROM user WHERE username = ''{0}'')",
+                username);
         queryExecutor.executeQuery(query);
     }
 }

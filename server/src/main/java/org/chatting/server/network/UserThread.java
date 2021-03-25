@@ -1,16 +1,15 @@
 package org.chatting.server.network;
 
 import org.chatting.common.message.*;
-import org.chatting.server.InvalidCredentialsException;
-import org.chatting.server.UserNotFoundException;
-import org.chatting.server.aspect.TransactionException;
 import org.chatting.server.database.DatabaseService;
+import org.chatting.server.entity.UserStatisticsEntity;
 import org.chatting.server.model.User;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Optional;
 
 public class UserThread extends Thread {
     private final NetworkService server;
@@ -79,6 +78,9 @@ public class UserThread extends Thread {
                 final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.USER,
                         user.getUsername(), userSendMessage.getMessage());
                 server.broadcast(chatMessage);
+
+                databaseService.incrementUserMessages(user.getUsername());
+                sendUserStatistics();
                 break;
             case USER_DISCONNECT:
                 shouldQuit = true;
@@ -100,6 +102,8 @@ public class UserThread extends Thread {
         this.user = constructUser(loginMessage);
         sendLoginResult(true);
 
+        databaseService.incrementUserLogins(user.getUsername());
+        sendUserStatistics();
         server.sendConnectedUsersList();
         final String announcement = String.format("%s has joined the chat!", user.getUsername());
         final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.SERVER, "Server", announcement);
@@ -122,6 +126,17 @@ public class UserThread extends Thread {
             return true;
         } catch (Exception ex) {
             return false;
+        }
+    }
+
+    private void sendUserStatistics() throws IOException {
+        final Optional<UserStatisticsEntity> userStatisticsOpt = databaseService.getUserStatistics(user.getUsername());
+        if (userStatisticsOpt.isPresent()) {
+            final UserStatisticsEntity userStatisticsEntity = userStatisticsOpt.get();
+            final UserStatisticsMessage userStatisticsMessage = new UserStatisticsMessage(
+                    userStatisticsEntity.getNumberOfLogins(),
+                    userStatisticsEntity.getNumberOfMessages());
+            sendMessage(userStatisticsMessage);
         }
     }
 }

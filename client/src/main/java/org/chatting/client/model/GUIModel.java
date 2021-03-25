@@ -9,10 +9,12 @@ import java.util.List;
 
 public class GUIModel {
 
+    private final StringProperty loginError = new SimpleStringProperty();
+    private final StringProperty signupError = new SimpleStringProperty();
+    private final StringProperty numberOfLogins = new SimpleStringProperty("Logins: 0");
+    private final StringProperty numberOfMessages = new SimpleStringProperty("Messages: 0");
     private ListView<String> chatMessagesListView;
     private ListView<String> connectedUsersListView;
-    private StringProperty loginError = new SimpleStringProperty();
-    private StringProperty signupError = new SimpleStringProperty();
 
     public void setChatMessagesListView(ListView<String> chatMessagesListView) {
         this.chatMessagesListView = chatMessagesListView;
@@ -53,5 +55,21 @@ public class GUIModel {
 
     public void clearSignupError() {
         signupError.set("");
+    }
+
+    public StringProperty getNumberOfLogins() {
+        return numberOfLogins;
+    }
+
+    public void setNumberOfLogins(int n) {
+        numberOfLogins.set(String.format("Logins: %d", n));
+    }
+
+    public StringProperty getNumberOfMessages() {
+        return numberOfMessages;
+    }
+
+    public void setNumberOfMessages(int n) {
+        numberOfMessages.set(String.format("Messages: %d", n));
     }
 }

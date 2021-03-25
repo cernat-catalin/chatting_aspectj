@@ -91,6 +91,13 @@ public class EventProcessor extends Thread {
                 final Message signupMessage = new SignupMessage(signUpButtonClickEvent.getUsername(), signUpButtonClickEvent.getPassword());
                 networkService.sendMessage(signupMessage);
                 break;
+            case USER_STATISTICS_RECEIVED:
+                final UserStatisticsReceivedEvent userStatisticsReceivedEvent = (UserStatisticsReceivedEvent) event;
+                Platform.runLater(() -> {
+                    sceneManager.getGuiModel().setNumberOfLogins(userStatisticsReceivedEvent.getNumberOfLogins());
+                    sceneManager.getGuiModel().setNumberOfMessages(userStatisticsReceivedEvent.getNumberOfMessages());
+                });
+                break;
             default:
                 throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + event.getEventType());
         }

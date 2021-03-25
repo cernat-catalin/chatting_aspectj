@@ -74,6 +74,13 @@ public class ReadThread extends Thread {
                 final Event userListReceived = new UserListReceivedEvent(userListMessage.getConnectedUsers());
                 eventQueue.pushEvent(userListReceived);
                 break;
+            case USER_STATISTICS:
+                final UserStatisticsMessage userStatisticsMessage = (UserStatisticsMessage) message;
+                final Event userStatisticsReceivedEvent = new UserStatisticsReceivedEvent(
+                        userStatisticsMessage.getNumberOfLogins(),
+                        userStatisticsMessage.getNumberOfMessages());
+                eventQueue.pushEvent(userStatisticsReceivedEvent);
+                break;
             default:
                 throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + message.getMessageType());
         }

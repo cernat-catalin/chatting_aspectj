@@ -11,6 +11,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import org.chatting.client.gui.EventQueue;
 import org.chatting.client.gui.event.Event;
 import org.chatting.client.gui.event.SendButtonClickEvent;
@@ -49,9 +50,17 @@ public class ChatRoomController {
         usersListView.setMaxWidth(120);
         guiModel.setConnectedUsersListView(usersListView);
 
-        final VBox usersBox = new VBox();
+        final Text numberOfLogins = new Text();
+        numberOfLogins.textProperty().bindBidirectional(guiModel.getNumberOfLogins());
+
+        final Text numberOfMessages = new Text();
+        numberOfMessages.textProperty().bindBidirectional(guiModel.getNumberOfMessages());
+
+        final VBox usersBox = new VBox(5);
         usersBox.getChildren().add(usersTitleLabel);
         usersBox.getChildren().add(usersListView);
+        usersBox.getChildren().add(numberOfLogins);
+        usersBox.getChildren().add(numberOfMessages);
         grid.add(usersBox, 0, 0);
 
         // Chat
@@ -91,6 +100,6 @@ public class ChatRoomController {
             }
         });
 
-        return new Scene(grid, 1200, 600);
+        return new Scene(grid, 1200, 650);
     }
 }

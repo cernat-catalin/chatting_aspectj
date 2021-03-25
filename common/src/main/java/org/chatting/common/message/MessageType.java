@@ -7,5 +7,6 @@ public enum MessageType implements Serializable {
     SIGN_UP, SIGN_UP_RESULT,
     USER_DISCONNECT,
     USER_LIST,
-    USER_SEND_MESSAGE, CHAT_MESSAGE
+    USER_SEND_MESSAGE, CHAT_MESSAGE,
+    USER_STATISTICS
 }
