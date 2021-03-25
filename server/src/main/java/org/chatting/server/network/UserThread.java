@@ -1,5 +1,7 @@
 package org.chatting.server.network;
 
+import org.chatting.common.exception.InvalidMessageException;
+import org.chatting.common.exception.UnsupportedMessageTypeException;
 import org.chatting.common.message.*;
 import org.chatting.server.database.DatabaseService;
 import org.chatting.server.entity.UserStatisticsEntity;
@@ -28,101 +30,103 @@ public class UserThread extends Thread {
         this.writer = new ObjectOutputStream(socket.getOutputStream());
     }
 
+    @Override
     public void run() {
         try {
             do {
                 final Object obj = reader.readObject();
                 if (!(obj instanceof Message)) {
-                    throw new RuntimeException("Wrong message type. Should inherit from Message. Object: " + obj);
+                    throw new InvalidMessageException(obj);
                 }
                 processMessage((Message) obj);
             } while (!shouldQuit);
         } catch (Exception ex) {
             System.out.println("Error in org.chatting.server.network.UserThread. Will remove user. Error was: " + ex.getMessage());
+            ex.printStackTrace();
         } finally {
-            handleUserRemove();
+            processUserDisconnect();
         }
-    }
-
-    private void handleUserRemove() {
-        server.removeUser(this);
-    }
-
-    public void sendLoginResult(boolean result) throws IOException {
-        System.out.println("Sencding login result message");
-        final Message loginResultMessage = new LoginResultMessage(result);
-        sendMessage(loginResultMessage);
-    }
-
-    private void sendSingUpResult(boolean result) throws IOException {
-        System.out.println("Sending signup result message");
-        final Message signupResultMessage = new SignupResultMessage(result);
-        sendMessage(signupResultMessage);
-    }
-
-    private void processMessage(Message message) throws IOException {
-        switch (message.getMessageType()) {
-            case LOGIN:
-                handleUserLogin((LoginMessage) message);
-                break;
-            case SIGN_UP:
-                final boolean createdUser = handleUserSignup((SignupMessage) message);
-                sendSingUpResult(createdUser);
-                break;
-            case USER_SEND_MESSAGE:
-                final UserSendMessage userSendMessage = (UserSendMessage) message;
-                final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.USER,
-                        user.getUsername(), userSendMessage.getMessage());
-                server.broadcast(chatMessage);
-
-                databaseService.incrementUserMessages(user.getUsername());
-                sendUserStatistics();
-                break;
-            case USER_DISCONNECT:
-                shouldQuit = true;
-                break;
-            default:
-                throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + message.getMessageType());
-        }
-    }
-
-    void sendMessage(Message message) throws IOException {
-        writer.writeObject(message);
     }
 
     public User getUser() {
         return user;
     }
 
-    private void handleUserLogin(LoginMessage loginMessage) throws IOException {
+    private void processMessage(Message message) throws IOException {
+        switch (message.getMessageType()) {
+            case LOGIN:
+                processLogin((LoginMessage) message);
+                break;
+            case SIGN_UP:
+                processSignup((SignupMessage) message);
+                break;
+            case USER_SEND_MESSAGE:
+                processUserMessage((UserSendMessage) message);
+                break;
+            case USER_DISCONNECT:
+                processUserDisconnect();
+                break;
+            default:
+                throw new UnsupportedMessageTypeException(message.getMessageType());
+        }
+    }
+
+    private void processLogin(LoginMessage loginMessage) throws IOException {
         this.user = constructUser(loginMessage);
+
         sendLoginResult(true);
+        server.sendConnectedUsersList();
 
         databaseService.incrementUserLogins(user.getUsername());
         sendUserStatistics();
-        server.sendConnectedUsersList();
+
         final String announcement = String.format("%s has joined the chat!", user.getUsername());
         final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.SERVER, "Server", announcement);
         server.broadcast(chatMessage);
     }
 
     private User constructUser(LoginMessage loginMessage) {
-        System.out.printf("Received login message from user: %s", loginMessage.getUsername());
         final String username = loginMessage.getUsername();
         final String password = loginMessage.getPassword();
         return new User(username, password);
     }
 
-    private boolean handleUserSignup(SignupMessage signupMessage) {
-        System.out.printf("Handling user signup\n");
+    private void processUserMessage(UserSendMessage userSendMessage) throws IOException {
+        final ChatMessage chatMessage = new ChatMessage(ChatMessage.AuthorType.USER,
+                user.getUsername(), userSendMessage.getMessage());
+
+        server.broadcast(chatMessage);
+        databaseService.incrementUserMessages(user.getUsername());
+        sendUserStatistics();
+    }
+
+    private void processUserDisconnect() {
+        if (!shouldQuit) {
+            shouldQuit = true;
+            server.removeUser(this);
+        }
+    }
+
+    private void processSignup(SignupMessage signupMessage) throws IOException {
         final String username = signupMessage.getUsername();
         final String password = signupMessage.getPassword();
+
         try {
             databaseService.addUser(username, password);
-            return true;
+            sendSingUpResult(true);
         } catch (Exception ex) {
-            return false;
+            sendSingUpResult(false);
         }
+    }
+
+    public void sendLoginResult(boolean result) throws IOException {
+        final Message loginResultMessage = new LoginResultMessage(result);
+        sendMessage(loginResultMessage);
+    }
+
+    private void sendSingUpResult(boolean result) throws IOException {
+        final Message signupResultMessage = new SignupResultMessage(result);
+        sendMessage(signupResultMessage);
     }
 
     private void sendUserStatistics() throws IOException {
@@ -134,5 +138,9 @@ public class UserThread extends Thread {
                     userStatisticsEntity.getNumberOfMessages());
             sendMessage(userStatisticsMessage);
         }
+    }
+
+    void sendMessage(Message message) throws IOException {
+        writer.writeObject(message);
     }
 }

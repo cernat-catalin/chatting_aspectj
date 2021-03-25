@@ -29,7 +29,6 @@ public class NetworkService {
     public void start() {
         try {
             this.socket = new Socket(hostname, port);
-            System.out.println("Connected to the chat server");
 
             this.writeThread = new WriteThread(socket, networkModel);
             this.readThread = new ReadThread(socket, networkModel, eventQueue);

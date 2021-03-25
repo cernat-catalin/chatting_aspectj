@@ -3,7 +3,6 @@ package org.chatting.server.network;
 import org.chatting.common.message.Message;
 import org.chatting.common.message.UserListMessage;
 import org.chatting.server.database.DatabaseService;
-import org.chatting.server.model.User;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -29,8 +28,6 @@ public class NetworkService {
 
             while (true) {
                 final Socket socket = serverSocket.accept();
-                System.out.println("New user connected");
-
                 final UserThread newUser = new UserThread(socket, this, databaseService);
                 userThreads.add(newUser);
                 newUser.start();
@@ -42,6 +39,10 @@ public class NetworkService {
         }
     }
 
+    public int getUserCount() {
+        return userThreads.size();
+    }
+
     void broadcast(Message message) throws IOException {
         for (UserThread userThread : userThreads) {
             userThread.sendMessage(message);
@@ -51,12 +52,6 @@ public class NetworkService {
     void removeUser(UserThread userThread) {
         try {
             userThreads.remove(userThread);
-            final User user = userThread.getUser();
-            if (user != null) {
-                System.out.println("The user " + userThread.getUser().getUsername() + " has left");
-            } else {
-                System.out.println("A user has left before login");
-            }
             sendConnectedUsersList();
         } catch (IOException ex) {
             System.out.printf("Error while removing user");

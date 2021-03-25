@@ -20,6 +20,7 @@ public class WriteThread extends Thread {
         this.writer = new ObjectOutputStream(socket.getOutputStream());
     }
 
+    @Override
     public void run() {
         try {
             while (!networkModel.shouldQuit()) {

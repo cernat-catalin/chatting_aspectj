@@ -10,19 +10,19 @@ public aspect EventLoggingAspect {
     private static final Logger LOGGER = Logger.getLogger("EventLogger");
 
     pointcut eventPush():
-            call(void org.chatting.client.gui.EventQueue.pushEvent(Event));
+            execution(void org.chatting.client.gui.EventQueue.pushEvent(Event));
 
     pointcut eventProcess():
-            call(void org.chatting.client.gui.EventProcessor.processEvent(Event));
+            execution(void org.chatting.client.gui.EventProcessor.processEvent(Event));
 
     before(Event event): eventPush() && args(event) {
-        Signature signature = thisEnclosingJoinPointStaticPart.getSignature();
-        LOGGER.info(String.format("Event pushed: [%s] from [%s]",
+        final Signature signature = thisEnclosingJoinPointStaticPart.getSignature();
+        LOGGER.info(String.format("[Event] Pushed [%s] from [%s]",
                 event.getEventType(),
                 signature));
     }
 
     before(Event event): eventProcess() && args(event) {
-        LOGGER.info(String.format("Event processed: [%s]", event.getEventType()));
+        LOGGER.info(String.format("[Event] Processed [%s]", event.getEventType()));
     }
 }

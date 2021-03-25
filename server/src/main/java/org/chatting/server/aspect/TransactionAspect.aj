@@ -1,10 +1,20 @@
 package org.chatting.server.aspect;
 
+import org.aspectj.lang.Signature;
+
 import java.sql.Connection;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.logging.Logger;
 
 public aspect TransactionAspect percflow(topLevelTransaction()) {
 
+    private static final Logger LOGGER = Logger.getLogger("TransactionLogger");
+    private static final Set<Integer> TRANSACTION_IDS = new HashSet<>();
+
     private Connection connection;
+    private int transactionId;
 
     pointcut createConnection():
             call(Connection org.chatting.server.database.DatabaseSource.createConnection());
@@ -21,7 +31,7 @@ public aspect TransactionAspect percflow(topLevelTransaction()) {
 
     Connection around(): createConnection() && cflow(transaction()) {
         if (connection == null) {
-            System.out.println("---- ADVICE CREATE CONNECTION");
+            LOGGER.info(String.format("[TRANSACTION %d] DB Connection acquired", transactionId));
             connection = proceed();
             connection.setAutoCommit(false);
         }
@@ -30,19 +40,23 @@ public aspect TransactionAspect percflow(topLevelTransaction()) {
     }
 
     Object around(): topLevelTransaction() {
-        System.out.println("---- ADVICE TOP LEVEL");
+        transactionId = generateNewTransactionId();
+        final Signature signature = thisJoinPoint.getSignature();
+        LOGGER.info(String.format("[TRANSACTION %d] Started from %s", transactionId, signature));
+
         try {
             Object result = proceed();
-            System.out.println("---- ADVICE COMMIT");
             connection.commit();
+            LOGGER.info(String.format("[TRANSACTION %d] Commit", transactionId));
             return result;
         } catch (Exception ex) {
-            System.out.println("---- ADVICE ROLLBACK");
+            LOGGER.info(String.format("[TRANSACTION %d] Rollback", transactionId));
             connection.rollback();
             throw new TransactionException(ex);
         } finally {
-            System.out.println("---- ADVICE ClOSE CONNECTION");
+            LOGGER.info(String.format("[TRANSACTION %d] DB Connection closed", transactionId));
             connection.close();
+            removeTransactionId(transactionId);
         }
     }
 
@@ -54,4 +68,24 @@ public aspect TransactionAspect percflow(topLevelTransaction()) {
                     || call (void Connection.setAutoCommit(boolean))
                     || call (void Connection.rollback())
                     && within(org.chatting.server.aspect.TransactionAspect);
+
+    private static Integer generateNewTransactionId() {
+        synchronized (TRANSACTION_IDS) {
+            final Random random = new Random();
+
+            Integer transactionId;
+            do {
+                transactionId = Math.abs(random.nextInt());
+            } while (TRANSACTION_IDS.contains(transactionId));
+
+            TRANSACTION_IDS.add(transactionId);
+            return transactionId;
+        }
+    }
+
+    private static void removeTransactionId(Integer transactionId) {
+        synchronized (TRANSACTION_IDS) {
+            TRANSACTION_IDS.remove(transactionId);
+        }
+    }
 }

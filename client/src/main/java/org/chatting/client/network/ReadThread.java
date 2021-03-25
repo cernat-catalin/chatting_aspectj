@@ -3,6 +3,8 @@ package org.chatting.client.network;
 import org.chatting.client.gui.EventQueue;
 import org.chatting.client.gui.event.*;
 import org.chatting.client.model.NetworkModel;
+import org.chatting.common.exception.InvalidMessageException;
+import org.chatting.common.exception.UnsupportedMessageTypeException;
 import org.chatting.common.message.*;
 
 import java.io.IOException;
@@ -22,12 +24,13 @@ public class ReadThread extends Thread {
         this.reader = new ObjectInputStream(socket.getInputStream());
     }
 
+    @Override
     public void run() {
         try {
             while (!networkModel.shouldQuit()) {
                 final Object obj = reader.readObject();
                 if (!(obj instanceof Message)) {
-                    throw new RuntimeException("Wrong message type. Should inherit from Message. Object: " + obj);
+                    throw new InvalidMessageException(obj);
                 }
                 processMessage((Message) obj);
             }
@@ -81,7 +84,7 @@ public class ReadThread extends Thread {
                 eventQueue.pushEvent(userStatisticsReceivedEvent);
                 break;
             default:
-                throw new RuntimeException("Unsupported message type in processing loop. Message Type: " + message.getMessageType());
+                throw new UnsupportedMessageTypeException(message.getMessageType());
         }
     }
 }
