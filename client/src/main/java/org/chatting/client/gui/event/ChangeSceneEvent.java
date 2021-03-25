@@ -1,6 +1,6 @@
 package org.chatting.client.gui.event;
 
-import org.chatting.client.gui.SceneType;
+import org.chatting.client.gui.controller.SceneType;
 
 public class ChangeSceneEvent implements Event {
 

@@ -10,7 +10,7 @@ public class LoginResultEvent implements Event {
 
     @Override
     public EventType getEventType() {
-        return EventType.LOGIN_RESULT;
+        return EventType.LOGIN_RESULT_RECEIVED;
     }
 
     public boolean isLoginAccepted() {

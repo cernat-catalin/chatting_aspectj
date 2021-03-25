@@ -1,21 +1,19 @@
-package org.chatting.client.gui;
+package org.chatting.client.gui.controller;
 
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import org.chatting.client.gui.controller.ChatRoomController;
-import org.chatting.client.gui.controller.LoginController;
-import org.chatting.client.gui.controller.SignUpController;
+import org.chatting.client.gui.EventQueue;
 import org.chatting.client.model.GUIModel;
 
-public class SceneManager {
+public class MainController {
     private final LoginController loginController;
     private final ChatRoomController chatRoomController;
     private final SignUpController signUpController;
     private final GUIModel guiModel;
     private Scene currentScene;
 
-    public SceneManager(EventQueue eventQueue) {
+    public MainController(EventQueue eventQueue) {
         this.guiModel = new GUIModel();
         this.loginController = new LoginController(guiModel, eventQueue);
         this.chatRoomController = new ChatRoomController(guiModel, eventQueue);

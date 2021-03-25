@@ -37,11 +37,7 @@ public class UserThread extends Thread {
                 }
                 processMessage((Message) obj);
             } while (!shouldQuit);
-        }
-//        catch (UserNotFoundException | InvalidCredentialsException ex) {
-//            System.out.printf("User credentials exception: s\n");
-//        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             System.out.println("Error in org.chatting.server.network.UserThread. Will remove user. Error was: " + ex.getMessage());
         } finally {
             handleUserRemove();

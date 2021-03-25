@@ -13,7 +13,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import org.chatting.client.gui.EventQueue;
-import org.chatting.client.gui.SceneType;
 import org.chatting.client.gui.event.ChangeSceneEvent;
 import org.chatting.client.gui.event.Event;
 import org.chatting.client.gui.event.SignUpButtonClickEvent;

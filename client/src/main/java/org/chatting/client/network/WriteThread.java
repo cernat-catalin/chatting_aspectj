@@ -17,7 +17,7 @@ public class WriteThread extends Thread {
 
     public WriteThread(Socket socket, NetworkModel networkModel) throws IOException {
         this.networkModel = networkModel;
-        writer = new ObjectOutputStream(socket.getOutputStream());
+        this.writer = new ObjectOutputStream(socket.getOutputStream());
     }
 
     public void run() {

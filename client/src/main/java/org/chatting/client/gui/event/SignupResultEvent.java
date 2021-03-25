@@ -10,7 +10,7 @@ public class SignupResultEvent implements Event {
 
     @Override
     public EventType getEventType() {
-        return EventType.SIGN_UP_RESULT;
+        return EventType.SIGN_UP_RESULT_RECEIVED;
     }
 
     public boolean isSignupAccepted() {

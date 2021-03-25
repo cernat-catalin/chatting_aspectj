@@ -1,6 +1,8 @@
 package org.chatting.client.gui;
 
 import javafx.application.Platform;
+import org.chatting.client.gui.controller.MainController;
+import org.chatting.client.gui.controller.SceneType;
 import org.chatting.client.gui.event.*;
 import org.chatting.client.network.NetworkService;
 import org.chatting.common.message.LoginMessage;
@@ -13,13 +15,13 @@ public class EventProcessor extends Thread {
     private static final int SLEEP_BETWEEN_READ_CHECKS = 100;
 
     private final EventQueue eventQueue;
-    private final SceneManager sceneManager;
+    private final MainController mainController;
     private final NetworkService networkService;
     private boolean shouldQuit = false;
 
-    public EventProcessor(EventQueue eventQueue, SceneManager sceneManager, NetworkService networkService) {
+    public EventProcessor(EventQueue eventQueue, MainController mainController, NetworkService networkService) {
         this.eventQueue = eventQueue;
-        this.sceneManager = sceneManager;
+        this.mainController = mainController;
         this.networkService = networkService;
     }
 
@@ -45,26 +47,26 @@ public class EventProcessor extends Thread {
                 final Message loginMessage = new LoginMessage(loginButtonClickEvent.getUsername(), loginButtonClickEvent.getPassword());
                 networkService.sendMessage(loginMessage);
                 break;
-            case LOGIN_RESULT:
+            case LOGIN_RESULT_RECEIVED:
                 final LoginResultEvent loginResultEvent = (LoginResultEvent) event;
                 Platform.runLater(() -> {
                     if (loginResultEvent.isLoginAccepted()) {
-                        sceneManager.getGuiModel().clearLoginError();
-                        sceneManager.changeScene(SceneType.CHAT_ROOM);
+                        mainController.getGuiModel().clearLoginError();
+                        mainController.changeScene(SceneType.CHAT_ROOM);
                     } else {
-                        sceneManager.getGuiModel().setLoginError();
+                        mainController.getGuiModel().setLoginError();
                     }
                 });
                 break;
-            case SIGN_UP_RESULT:
+            case SIGN_UP_RESULT_RECEIVED:
                 final SignupResultEvent signupResultEvent = (SignupResultEvent) event;
                 Platform.runLater(() -> {
                     if (signupResultEvent.isSignupAccepted()) {
-                        sceneManager.getGuiModel().clearSignupError();
-                        sceneManager.getGuiModel().clearLoginError();
-                        sceneManager.changeScene(SceneType.LOGIN);
+                        mainController.getGuiModel().clearSignupError();
+                        mainController.getGuiModel().clearLoginError();
+                        mainController.changeScene(SceneType.LOGIN);
                     } else {
-                        sceneManager.getGuiModel().setSignupError();
+                        mainController.getGuiModel().setSignupError();
                     }
                 });
                 break;
@@ -76,15 +78,15 @@ public class EventProcessor extends Thread {
                 break;
             case CHAT_MESSAGE_RECEIVED:
                 final ChatMessageReceivedEvent chatMessageReceivedEvent = (ChatMessageReceivedEvent) event;
-                Platform.runLater(() -> sceneManager.getGuiModel().addChatMessage(formatMessage(chatMessageReceivedEvent)));
+                Platform.runLater(() -> mainController.getGuiModel().addChatMessage(formatMessage(chatMessageReceivedEvent)));
                 break;
             case USER_LIST_RECEIVED:
                 final UserListReceivedEvent userListReceivedEvent = (UserListReceivedEvent) event;
-                Platform.runLater(() -> sceneManager.getGuiModel().setConnectedUsers(userListReceivedEvent.getConnectedUsers()));
+                Platform.runLater(() -> mainController.getGuiModel().setConnectedUsers(userListReceivedEvent.getConnectedUsers()));
                 break;
             case CHANGE_SCENE:
                 final ChangeSceneEvent changeSceneEvent = (ChangeSceneEvent) event;
-                Platform.runLater(() -> sceneManager.changeScene(changeSceneEvent.getSceneType()));
+                Platform.runLater(() -> mainController.changeScene(changeSceneEvent.getSceneType()));
                 break;
             case SIGN_UP_BUTTON_CLICK:
                 final SignUpButtonClickEvent signUpButtonClickEvent = (SignUpButtonClickEvent) event;
@@ -94,8 +96,8 @@ public class EventProcessor extends Thread {
             case USER_STATISTICS_RECEIVED:
                 final UserStatisticsReceivedEvent userStatisticsReceivedEvent = (UserStatisticsReceivedEvent) event;
                 Platform.runLater(() -> {
-                    sceneManager.getGuiModel().setNumberOfLogins(userStatisticsReceivedEvent.getNumberOfLogins());
-                    sceneManager.getGuiModel().setNumberOfMessages(userStatisticsReceivedEvent.getNumberOfMessages());
+                    mainController.getGuiModel().setNumberOfLogins(userStatisticsReceivedEvent.getNumberOfLogins());
+                    mainController.getGuiModel().setNumberOfMessages(userStatisticsReceivedEvent.getNumberOfMessages());
                 });
                 break;
             default:
@@ -108,10 +110,13 @@ public class EventProcessor extends Thread {
     }
 
     private String formatMessage(ChatMessageReceivedEvent chatMessageReceivedEvent) {
-        if (chatMessageReceivedEvent.getAuthorType() == ChatMessageReceivedEvent.AuthorType.SERVER) {
-            return String.format("[SERVER]: %s", chatMessageReceivedEvent.getMessage());
-        } else {
-            return String.format("%s: %s", chatMessageReceivedEvent.getAuthorName(), chatMessageReceivedEvent.getMessage());
+        switch (chatMessageReceivedEvent.getAuthorType()) {
+            case SERVER:
+                return String.format("[SERVER]: %s", chatMessageReceivedEvent.getMessage());
+            case USER:
+                return String.format("%s: %s", chatMessageReceivedEvent.getAuthorName(), chatMessageReceivedEvent.getMessage());
+            default:
+                return chatMessageReceivedEvent.getMessage();
         }
     }
 }

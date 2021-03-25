@@ -11,19 +11,19 @@ import java.net.UnknownHostException;
 public class NetworkService {
     private final String hostname;
     private final int port;
+    private final EventQueue eventQueue;
 
     private final NetworkModel networkModel;
     private Socket socket;
     private WriteThread writeThread;
     private ReadThread readThread;
 
-    private final EventQueue eventQueue;
 
     public NetworkService(String hostname, int port, EventQueue eventQueue) {
         this.hostname = hostname;
         this.port = port;
-        this.networkModel = new NetworkModel();
         this.eventQueue = eventQueue;
+        this.networkModel = new NetworkModel();
     }
 
     public void start() {
@@ -36,7 +36,6 @@ public class NetworkService {
 
             writeThread.start();
             readThread.start();
-
         } catch (UnknownHostException ex) {
             System.out.println("Server not found: " + ex.getMessage());
         } catch (IOException ex) {
@@ -44,7 +43,7 @@ public class NetworkService {
         }
     }
 
-    public void stop() {
+    public void stopProcessing() {
         try {
             networkModel.setShouldQuit(true);
             writeThread.join();

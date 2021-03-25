@@ -51,7 +51,6 @@ public class ReadThread extends Thread {
         switch (message.getMessageType()) {
             case CHAT_MESSAGE:
                 final ChatMessage chatMessage = (ChatMessage) message;
-
                 final Event chatMessageReceived = new ChatMessageReceivedEvent(
                         ChatMessageReceivedEvent.AuthorType.valueOf(chatMessage.getAuthorType().name()),
                         chatMessage.getAuthorName(),

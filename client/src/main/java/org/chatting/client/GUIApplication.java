@@ -5,13 +5,13 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.chatting.client.gui.EventProcessor;
 import org.chatting.client.gui.EventQueue;
-import org.chatting.client.gui.SceneManager;
+import org.chatting.client.gui.controller.MainController;
 import org.chatting.client.network.NetworkService;
 
 public class GUIApplication extends Application {
 
     private final NetworkService networkService;
-    private final SceneManager sceneManager;
+    private final MainController mainController;
     private final EventProcessor eventProcessor;
 
     public GUIApplication() {
@@ -20,8 +20,8 @@ public class GUIApplication extends Application {
 
         final EventQueue eventQueue = new EventQueue();
         this.networkService = new NetworkService(hostname, port, eventQueue);
-        this.sceneManager = new SceneManager(eventQueue);
-        this.eventProcessor = new EventProcessor(eventQueue, sceneManager, networkService);
+        this.mainController = new MainController(eventQueue);
+        this.eventProcessor = new EventProcessor(eventQueue, mainController, networkService);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class GUIApplication extends Application {
         networkService.start();
         eventProcessor.start();
 
-        final Scene loginScene = sceneManager.getCurrentScene();
+        final Scene loginScene = mainController.getCurrentScene();
         stage.setScene(loginScene);
         stage.setResizable(false);
         stage.show();
@@ -37,7 +37,7 @@ public class GUIApplication extends Application {
 
     @Override
     public void stop() {
-        networkService.stop();
+        networkService.stopProcessing();
         eventProcessor.stopProcessing();
     }
 }

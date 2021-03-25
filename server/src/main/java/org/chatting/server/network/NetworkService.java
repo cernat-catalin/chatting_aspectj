@@ -68,6 +68,7 @@ public class NetworkService {
                 .filter(ut -> ut.getUser() != null)
                 .map(ut -> ut.getUser().getUsername())
                 .collect(Collectors.toList());
+
         final Message message = new UserListMessage(connectedUsers);
         for (UserThread userThread : userThreads) {
             userThread.sendMessage(message);

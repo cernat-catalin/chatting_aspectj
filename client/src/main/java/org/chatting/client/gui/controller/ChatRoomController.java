@@ -50,9 +50,9 @@ public class ChatRoomController {
         usersListView.setMaxWidth(120);
         guiModel.setConnectedUsersListView(usersListView);
 
+        // User Statistics
         final Text numberOfLogins = new Text();
         numberOfLogins.textProperty().bindBidirectional(guiModel.getNumberOfLogins());
-
         final Text numberOfMessages = new Text();
         numberOfMessages.textProperty().bindBidirectional(guiModel.getNumberOfMessages());
 
