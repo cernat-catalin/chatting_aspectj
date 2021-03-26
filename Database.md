@@ -3,7 +3,6 @@
 ## User table
 
 DDL
-
 ```sqlite
 CREATE TABLE user
 (
@@ -20,10 +19,4 @@ CREATE TABLE user_statistics
     n_messages INTEGER DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES user (id)
 );
-```
-
-DML
-
-```sqlite
-
 ```
