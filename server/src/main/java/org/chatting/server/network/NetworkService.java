@@ -2,6 +2,7 @@ package org.chatting.server.network;
 
 import org.chatting.common.message.Message;
 import org.chatting.common.message.UserListMessage;
+import org.chatting.server.NetworkException;
 import org.chatting.server.database.DatabaseService;
 
 import java.io.IOException;
@@ -24,7 +25,6 @@ public class NetworkService {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Chat Server is listening on port " + port);
 
             while (true) {
                 final Socket socket = serverSocket.accept();
@@ -34,8 +34,7 @@ public class NetworkService {
             }
 
         } catch (IOException ex) {
-            System.out.println("Error in the server: " + ex.getMessage());
-            ex.printStackTrace();
+            throw new NetworkException(ex);
         }
     }
 
@@ -54,7 +53,7 @@ public class NetworkService {
             userThreads.remove(userThread);
             sendConnectedUsersList();
         } catch (IOException ex) {
-            System.out.printf("Error while removing user");
+            System.out.printf("Error removing user %s\n", ex);
         }
     }
 

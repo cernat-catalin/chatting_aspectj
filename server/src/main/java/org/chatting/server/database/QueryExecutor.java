@@ -12,8 +12,8 @@ import java.util.Optional;
 public class QueryExecutor {
 
     public <T> Optional<T> getResultSingle(String query, EntityMapper<T> entityMapper) {
-        final Connection connection = DatabaseSource.createConnection();
         try {
+            final Connection connection = DatabaseSource.createConnection();
             final Statement statement = connection.createStatement();
             final ResultSet resultSet = statement.executeQuery(query);
             final Optional<T> result = entityMapper.extractSingle(resultSet);
@@ -29,8 +29,8 @@ public class QueryExecutor {
     }
 
     public <T> List<T> getResultList(String query, EntityMapper<T> entityMapper) {
-        final Connection connection = DatabaseSource.createConnection();
         try {
+            final Connection connection = DatabaseSource.createConnection();
             final Statement statement = connection.createStatement();
             final ResultSet resultSet = statement.executeQuery(query);
             final List<T> result = entityMapper.extractList(resultSet);
@@ -46,8 +46,8 @@ public class QueryExecutor {
     }
 
     public void executeQuery(String query) {
-        final Connection connection = DatabaseSource.createConnection();
         try {
+            final Connection connection = DatabaseSource.createConnection();
             final Statement statement = connection.createStatement();
             statement.executeUpdate(query);
 

@@ -3,6 +3,7 @@ package org.chatting.server.network;
 import org.chatting.common.exception.InvalidMessageException;
 import org.chatting.common.exception.UnsupportedMessageTypeException;
 import org.chatting.common.message.*;
+import org.chatting.server.NetworkException;
 import org.chatting.server.database.DatabaseService;
 import org.chatting.server.entity.UserStatisticsEntity;
 import org.chatting.server.model.User;
@@ -41,8 +42,7 @@ public class UserThread extends Thread {
                 processMessage((Message) obj);
             } while (!shouldQuit);
         } catch (Exception ex) {
-            System.out.println("Error in org.chatting.server.network.UserThread. Will remove user. Error was: " + ex.getMessage());
-            ex.printStackTrace();
+            throw new NetworkException(ex);
         } finally {
             processUserDisconnect();
         }
